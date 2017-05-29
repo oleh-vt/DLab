@@ -18,10 +18,10 @@
 inactiveUserTimeoutMillSec: 7200000
 ldapConnectionConfig:
 #  ldapHost: localhost
-  ldapHost: ec2-52-36-63-161.us-west-2.compute.amazonaws.com
+  ldapHost: 10.53.36.118
 #  ldapPort: 3890
   ldapPort: 389
-  name: cn=admin,dc=example,dc=com
+  name: cn=admin,dc=copyright,dc=com
   credentials: ldap
 ldapBindTemplate: uid=%s,ou=People,dc=example,dc=com
 ldapBindAttribute: uid
@@ -155,7 +155,7 @@ server:
 -->
 
 userInfoPersistenceEnabled: true
-awsUserIdentificationEnabled: true
+awsUserIdentificationEnabled: false
 
 logging:
   level: INFO
