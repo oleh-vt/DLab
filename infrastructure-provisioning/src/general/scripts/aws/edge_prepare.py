@@ -132,7 +132,7 @@ if __name__ == "__main__":
             {
                 "PrefixListIds": [],
                 "FromPort": 22,
-                "IpRanges": [{"CidrIp": "0.0.0.0/0"}],
+                "IpRanges": [{"CidrIp": "10.0.0.0/8"}],
                 "ToPort": 22, "IpProtocol": "tcp", "UserIdGroupPairs": []
             }
         ]
