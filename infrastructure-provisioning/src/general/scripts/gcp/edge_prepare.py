@@ -301,23 +301,20 @@ if __name__ == "__main__":
     #     sys.exit(1)
 
     try:
-        logging.info('[CREATING ELASTIC IP ADDRESS]')
-        print '[CREATING ELASTIC IP ADDRESS]'
+        logging.info('[CREATING STATIC IP ADDRESS]')
+        print '[CREATING STATIC IP ADDRESS]'
+        params = "--address_name {} --region {}".format(edge_conf['static_address_name'], edge_conf['region'])
         try:
-            edge_conf['elastic_ip'] = os.environ['edge_elastic_ip']
+            local("~/scripts/{}.py {}".format('edge_create_static_ip', params))
         except:
-            params = "--address_name {} --region {}".format(edge_conf['static_address_name'], edge_conf['region'])
-            try:
-                local("~/scripts/{}.py {}".format('edge_create_elastic_ip', params))
-            except:
-                traceback.print_exc()
-                raise Exception
+            traceback.print_exc()
+            raise Exception
     except Exception as err:
-        append_result("Failed to create elastic ip.", str(err))
+        append_result("Failed to create static ip.", str(err))
         try:
             GCPActions().remove_static_address(edge_conf['static_address_name'], edge_conf['region'])
         except:
-            print "Elastic IP address hasn't been created."
+            print "Static IP address hasn't been created."
         GCPActions().remove_bucket(edge_conf['bucket_name'])
         GCPActions().remove_firewall(edge_conf['fw_edge_ingress_public'])
         GCPActions().remove_firewall(edge_conf['fw_edge_ingress_internal'])
@@ -334,14 +331,14 @@ if __name__ == "__main__":
         sudo_group = 'wheel'
 
     try:
-        edge_conf['elastic_ip'] = \
+        edge_conf['static_ip'] = \
             GCPMeta().get_static_address(edge_conf['region'], edge_conf['static_address_name'])['address']
         logging.info('[CREATE EDGE INSTANCE]')
         print('[CREATE SSN INSTANCE]')
-        params = "--instance_name {} --region {} --zone {} --vpc_name {} --subnet_name {} --instance_size {} --ssh_key_path {} --initial_user {} --service_account_name {} --ami_name {} --instance_class {} --elastic_ip {}".\
+        params = "--instance_name {} --region {} --zone {} --vpc_name {} --subnet_name {} --instance_size {} --ssh_key_path {} --initial_user {} --service_account_name {} --ami_name {} --instance_class {} --static_ip {}".\
             format(edge_conf['instance_name'], edge_conf['region'], edge_conf['zone'], edge_conf['vpc_name'],
                    edge_conf['subnet_name'], edge_conf['instance_size'], edge_conf['ssh_key_path'], initial_user,
-                   edge_conf['edge_service_account_name'], edge_conf['ami_name'], 'edge', edge_conf['elastic_ip'])
+                   edge_conf['edge_service_account_name'], edge_conf['ami_name'], 'edge', edge_conf['static_ip'])
         try:
             local("~/scripts/{}.py {}".format('common_create_instance', params))
         except:

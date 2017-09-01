@@ -67,7 +67,7 @@ if __name__ == "__main__":
     edge_conf['dlab_ssh_user'] = os.environ['conf_os_user']
     edge_conf['private_subnet_cidr'] = GCPMeta().get_subnet(edge_conf['subnet_name'],
                                                             edge_conf['region'])['ipCidrRange']
-    edge_conf['elastic_ip'] = \
+    edge_conf['static_ip'] = \
         GCPMeta().get_static_address(edge_conf['region'], edge_conf['static_address_name'])['address']
     edge_conf['private_ip'] = GCPMeta().get_private_ip_address(edge_conf['instance_name'])
 
@@ -170,7 +170,7 @@ if __name__ == "__main__":
         logging.info('[SUMMARY]')
         print "Instance name: " + edge_conf['instance_name']
         print "Hostname: " + instance_hostname
-        print "Public IP: " + edge_conf['elastic_ip']
+        print "Public IP: " + edge_conf['static_ip']
         print "Private IP: " + edge_conf['private_ip']
         print "Key name: " + edge_conf['key_name']
         print "Bucket name: " + edge_conf['bucket_name']
@@ -180,7 +180,7 @@ if __name__ == "__main__":
         print "Notebook subnet: " + edge_conf['private_subnet_cidr']
         with open("/root/result.json", 'w') as result:
             res = {"hostname": instance_hostname,
-                   "public_ip": edge_conf['elastic_ip'],
+                   "public_ip": edge_conf['static_ip'],
                    "ip": edge_conf['private_ip'],
                    "key_name": edge_conf['key_name'],
                    "user_own_bucket_name": edge_conf['bucket_name'],
