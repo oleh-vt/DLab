@@ -89,7 +89,7 @@ if __name__ == "__main__":
     local('touch /response/.dataproc_creating_{}'.format(os.environ['exploratory_name']))
     local("echo Waiting for changes to propagate; sleep 10")
 
-    dataproc_cluster = json.loads(open('/root/templates/dataproc_cluster.json').read().decode('utf-8-sig'))
+    dataproc_cluster = json.loads(open('/root/templates/dataengine-service_cluster.json').read().decode('utf-8-sig'))
     dataproc_cluster['projectId'] = os.environ['gcp_project_id']
     dataproc_cluster['clusterName'] = dataproc_conf['cluster_name']
     dataproc_cluster['labels'] = dataproc_conf['cluster_label']

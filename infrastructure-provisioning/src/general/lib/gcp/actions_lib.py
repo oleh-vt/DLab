@@ -684,7 +684,7 @@ class GCPActions:
             print "Job ID:", res['reference']['jobId']
             job_status = meta_lib.GCPMeta().get_dataproc_job_status(res['reference']['jobId'])
             while job_status != 'done':
-                time.sleep(1)
+                time.sleep(5)
                 job_status = meta_lib.GCPMeta().get_dataproc_job_status(res['reference']['jobId'])
                 if job_status == 'failed':
                     raise Exception
@@ -697,7 +697,7 @@ class GCPActions:
                                "error_message": str(err) + "\n Traceback: " + traceback.print_exc(
                                    file=sys.stdout)}))
             traceback.print_exc(file=sys.stdout)
-            return ''
+            sys.exit(1)
 
     def get_cluster_app_version(self, bucket, user_name, cluster_name, application):
         try:
@@ -764,7 +764,7 @@ class GCPActions:
         local(""" sudo bash -c " sed -i 's|/hadoop/spark/work|/tmp/hadoop/spark/work|g' {}" """.format(spark_def_path))
         local(""" sudo bash -c " sed -i 's|/hadoop/spark/tmp|/tmp/hadoop/spark/tmp|g' {}" """.format(spark_def_path))
         local(""" sudo bash -c " sed -i 's/STANDALONE_SPARK_MASTER_HOST.*/STANDALONE_SPARK_MASTER_HOST={0}-m/g' {1}" """.format(args.cluster_name, spark_def_path))
-        local(""" sudo bash -c " sed -i 's|/hadoop gcs_connector_metadata_cache|/tmp/hadoop gcs_connector_metadata_cache|g' /opt/{0}/{1}/conf/core-site.xml" """.format(args.dataproc_version, args.cluster_name))
+        local(""" sudo bash -c " sed -i 's|/hadoop_gcs_connector_metadata_cache|/tmp/hadoop_gcs_connector_metadata_cache|g' /opt/{0}/{1}/conf/core-site.xml" """.format(args.dataproc_version, args.cluster_name))
 
     def remove_kernels(self, notebook_name, dataproc_name, dataproc_version, ssh_user, key_path):
         try:
@@ -815,13 +815,13 @@ class GCPActions:
                         zeppelin_restarted = True
                 sudo('sleep 5')
                 sudo('rm -rf /home/{}/.ensure_dir/dataengine-service_{}_interpreter_ensured'.format(ssh_user, dataproc_name))
-                if exists('/home/{}/.ensure_dir/rstudio_dataengine-service_ensured'.format(ssh_user)):
-                    sudo("sed -i '/{0}/d' /home/{1}/.Renviron".format(dataproc_name, ssh_user))
-                    if not sudo("sed -n '/^SPARK_HOME/p' /home/{}/.Renviron".format(ssh_user)):
-                        sudo("sed -i '1!G;h;$!d;' /home/{0}/.Renviron; sed -i '1,3s/#//;1!G;h;$!d' /home/{0}/.Renviron".format(ssh_user))
-                    sudo("sed -i 's|/opt/{0}/{1}/spark//R/lib:||g' /home/{2}/.bashrc".format(dataproc_version, dataproc_name, ssh_user))
-                sudo('rm -rf  /opt/{0}/{1}/'.format(dataproc_version, dataproc_name))
-                print "Notebook's " + env.hosts + " kernels were removed"
+            if exists('/home/{}/.ensure_dir/rstudio_dataproc_ensured'.format(ssh_user)):
+                sudo("sed -i '/{0}/d' /home/{1}/.Renviron".format(dataproc_name, ssh_user))
+                if not sudo("sed -n '/^SPARK_HOME/p' /home/{}/.Renviron".format(ssh_user)):
+                    sudo("sed -i '1!G;h;$!d;' /home/{0}/.Renviron; sed -i '1,3s/#//;1!G;h;$!d' /home/{0}/.Renviron".format(ssh_user))
+                sudo("sed -i 's|/opt/{0}/{1}/spark//R/lib:||g' /home/{2}/.bashrc".format(dataproc_version, dataproc_name, ssh_user))
+            sudo('rm -rf  /opt/{0}/{1}/'.format(dataproc_version, dataproc_name))
+            print "Notebook's " + env.hosts + " kernels were removed"
         except Exception as err:
             logging.info(
                 "Unable to delete dataproc kernels from notebook: " + str(err) + "\n Traceback: " + traceback.print_exc(

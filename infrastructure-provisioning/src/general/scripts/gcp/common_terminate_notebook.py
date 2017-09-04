@@ -28,26 +28,22 @@ import os
 import uuid
 
 
-def terminate_nb(instance_name, zone):
-    #print 'Terminating EMR cluster and cleaning EMR config from S3 bucket'
-    #try:
-    #    clusters_list = get_emr_list(nb_tag_value, 'Value')
-    #    if clusters_list:
-    #        for cluster_id in clusters_list:
-    #            client = boto3.client('emr')
-    #            cluster = client.describe_cluster(ClusterId=cluster_id)
-    #            cluster = cluster.get("Cluster")
-    #            emr_name = cluster.get('Name')
-    #            print 'Cleaning bucket from configs for cluster {}'.format(emr_name)
-    #            s3_cleanup(bucket_name, emr_name, os.environ['edge_user_name'])
-    #            print "The bucket " + bucket_name + " has been cleaned successfully"
-    #            print 'Terminating cluster {}'.format(emr_name)
-    #            terminate_emr(cluster_id)
-    #            print "The EMR cluster " + emr_name + " has been terminated successfully"
-    #    else:
-    #        print "There are no EMR clusters to terminate."
-    #except:
-    #    sys.exit(1)
+def terminate_nb(instance_name, bucket_name, zone, ssh_user, key_path, user_name):
+    print 'Terminating Dataproc cluster and cleaning Dataproc config from bucket'
+    try:
+        clusters_list = meta_lib.GCPMeta().get_dataproc_list(instance_name)
+        if clusters_list:
+            for cluster_name in clusters_list:
+                cluster = meta_lib.GCPMeta().get_list_cluster_statuses([cluster_name])
+                actions_lib.GCPActions().bucket_cleanup(bucket_name, user_name, cluster_name)
+                print 'The bucket {} has been cleaned successfully'.format(bucket_name)
+                actions_lib.GCPActions().delete_dataproc_cluster(cluster_name, os.environ['gcp_region'])
+                print 'The Dataproc cluster {} has been terminated successfully'.format(cluster_name)
+                actions_lib.GCPActions().remove_kernels(instance_name, cluster_name, cluster[0]['version'], ssh_user, key_path)
+        else:
+            print "There are no Dataproc clusters to terminate."
+    except:
+       sys.exit(1)
 
     print "Terminating notebook"
     try:
@@ -69,13 +65,17 @@ if __name__ == "__main__":
     notebook_config = dict()
     notebook_config['service_base_name'] = (os.environ['conf_service_base_name']).lower().replace('_', '-')
     notebook_config['notebook_name'] = os.environ['notebook_instance_name']
+    notebook_config['bucket_name'] = '{}-ssn-bucket'.format(notebook_config['service_base_name'])
+    notebook_config['key_path'] = '{0}{1}.pem'.format(os.environ['conf_key_dir'], os.environ['conf_key_name'])
+    notebook_config['user_name'] = (os.environ['edge_user_name']).lower().replace('_', '-')
     notebook_config['zone'] = os.environ['gcp_zone']
 
     try:
         logging.info('[TERMINATE NOTEBOOK]')
         print '[TERMINATE NOTEBOOK]'
         try:
-            terminate_nb(notebook_config['notebook_name'], notebook_config['zone'])
+            terminate_nb(notebook_config['notebook_name'], notebook_config['bucket_name'], notebook_config['zone'],
+                      os.environ['conf_os_user'], notebook_config['key_path'], notebook_config['user_name'])
         except Exception as err:
             traceback.print_exc()
             append_result("Failed to terminate notebook.", str(err))
