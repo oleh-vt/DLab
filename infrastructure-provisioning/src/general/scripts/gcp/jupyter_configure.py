@@ -48,9 +48,9 @@ if __name__ == "__main__":
     notebook_config['service_base_name'] = (os.environ['conf_service_base_name']).lower().replace('_', '-')
     notebook_config['instance_type'] = os.environ['gcp_notebook_instance_size']
     notebook_config['key_name'] = os.environ['conf_key_name']
-    notebook_config['user_keyname'] = (os.environ['edge_user_name']).lower().replace('_', '-')
     notebook_config['edge_user_name'] = (os.environ['edge_user_name']).lower().replace('_', '-')
-    notebook_config['instance_name'] = '{0}-{1}-nb-{2}-{3}'.format(notebook_config['service_base_name'], notebook_config['edge_user_name'],
+    notebook_config['instance_name'] = '{0}-{1}-nb-{2}-{3}'.format(notebook_config['service_base_name'],
+                                                                   notebook_config['edge_user_name'],
                                                                    notebook_config['exploratory_name'], args.uuid)
     instance_hostname = GCPMeta().get_private_ip_address(notebook_config['instance_name'])
     edge_instance_name = '{0}-{1}-edge'.format(notebook_config['service_base_name'], notebook_config['edge_user_name'])
@@ -209,13 +209,14 @@ if __name__ == "__main__":
     print "Private IP: " + ip_address
     print "Instance type: " + notebook_config['instance_type']
     print "Key name: " + notebook_config['key_name']
-    print "User key name: " + notebook_config['user_keyname']
+    print "User key name: " + notebook_config['edge_user_name']
     # print "AMI name: " + notebook_config['expected_ami_name']
     # print "Profile name: " + notebook_config['role_profile_name']
     # print "SG name: " + notebook_config['security_group_name']
     print "Jupyter URL: " + jupyter_ip_url
     print "Ungit URL: " + ungit_ip_url
-    print 'SSH access (from Edge node, via IP address): ssh -i {0}.pem {1}@{2}'.format(notebook_config['key_name'], notebook_config['dlab_ssh_user'], ip_address)
+    print 'SSH access (from Edge node, via IP address): ssh -i {0}.pem {1}@{2}'\
+        .format(notebook_config['key_name'], notebook_config['dlab_ssh_user'], ip_address)
 
     with open("/root/result.json", 'w') as result:
         res = {"hostname": ip_address,

@@ -764,6 +764,7 @@ class GCPActions:
         local(""" sudo bash -c " sed -i 's|/hadoop/spark/work|/tmp/hadoop/spark/work|g' {}" """.format(spark_def_path))
         local(""" sudo bash -c " sed -i 's|/hadoop/spark/tmp|/tmp/hadoop/spark/tmp|g' {}" """.format(spark_def_path))
         local(""" sudo bash -c " sed -i 's/STANDALONE_SPARK_MASTER_HOST.*/STANDALONE_SPARK_MASTER_HOST={0}-m/g' {1}" """.format(args.cluster_name, spark_def_path))
+        local(""" sudo bash -c " sed -i 's|/hadoop gcs_connector_metadata_cache|/tmp/hadoop gcs_connector_metadata_cache|g' /opt/{0}/{1}/conf/core-site.xml" """.format(args.dataproc_version, args.cluster_name))
 
     def remove_kernels(self, notebook_name, dataproc_name, dataproc_version, ssh_user, key_path):
         try:
