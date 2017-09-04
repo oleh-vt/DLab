@@ -47,6 +47,7 @@ if __name__ == "__main__":
         ssn_conf['region'] = os.environ['gcp_region']
         ssn_conf['zone'] = os.environ['gcp_zone']
         ssn_conf['ssn_bucket_name'] = '{}-ssn-bucket'.format(ssn_conf['service_base_name'])
+        ssn_conf['shared_bucket_name'] = '{}-shared-bucket'.format(ssn_conf['service_base_name'])
         ssn_conf['instance_name'] = '{}-ssn'.format(ssn_conf['service_base_name'])
         ssn_conf['instance_size'] = os.environ['ssn_instance_size']
         ssn_conf['vpc_name'] = '{}-ssn-vpc'.format(ssn_conf['service_base_name'])
@@ -113,6 +114,7 @@ if __name__ == "__main__":
         GCPActions().remove_instance(ssn_conf['instance_name'], ssn_conf['zone'])
         # GCPActions().remove_service_account(ssn_conf['service_account_name'])
         GCPActions().remove_bucket(ssn_conf['ssn_bucket_name'])
+        GCPActions().remove_bucket(ssn_conf['shared_bucket_name'])
         if pre_defined_firewall:
             GCPActions().remove_firewall(ssn_conf['firewall_name'])
         if pre_defined_subnet:
@@ -137,6 +139,7 @@ if __name__ == "__main__":
         GCPActions().remove_instance(ssn_conf['instance_name'], ssn_conf['zone'])
         # GCPActions().remove_service_account(ssn_conf['service_account_name'])
         GCPActions().remove_bucket(ssn_conf['ssn_bucket_name'])
+        GCPActions().remove_bucket(ssn_conf['shared_bucket_name'])
         if pre_defined_firewall:
             GCPActions().remove_firewall(ssn_conf['firewall_name'])
         if pre_defined_subnet:
@@ -166,6 +169,7 @@ if __name__ == "__main__":
         GCPActions().remove_instance(ssn_conf['instance_name'], ssn_conf['zone'])
         # GCPActions().remove_service_account(ssn_conf['service_account_name'])
         GCPActions().remove_bucket(ssn_conf['ssn_bucket_name'])
+        GCPActions().remove_bucket(ssn_conf['shared_bucket_name'])
         if pre_defined_firewall:
             GCPActions().remove_firewall(ssn_conf['firewall_name'])
         if pre_defined_subnet:
@@ -200,6 +204,7 @@ if __name__ == "__main__":
         GCPActions().remove_instance(ssn_conf['instance_name'], ssn_conf['zone'])
         # GCPActions().remove_service_account(ssn_conf['service_account_name'])
         GCPActions().remove_bucket(ssn_conf['ssn_bucket_name'])
+        GCPActions().remove_bucket(ssn_conf['shared_bucket_name'])
         if pre_defined_firewall:
             GCPActions().remove_firewall(ssn_conf['firewall_name'])
         if pre_defined_subnet:
@@ -229,6 +234,7 @@ if __name__ == "__main__":
         GCPActions().remove_instance(ssn_conf['instance_name'], ssn_conf['zone'])
         # GCPActions().remove_service_account(ssn_conf['service_account_name'])
         GCPActions().remove_bucket(ssn_conf['ssn_bucket_name'])
+        GCPActions().remove_bucket(ssn_conf['shared_bucket_name'])
         if pre_defined_firewall:
             GCPActions().remove_firewall(ssn_conf['firewall_name'])
         if pre_defined_subnet:
@@ -289,6 +295,7 @@ if __name__ == "__main__":
         GCPActions().remove_instance(ssn_conf['instance_name'], ssn_conf['zone'])
         # GCPActions().remove_service_account(ssn_conf['service_account_name'])
         GCPActions().remove_bucket(ssn_conf['ssn_bucket_name'])
+        GCPActions().remove_bucket(ssn_conf['shared_bucket_name'])
         if pre_defined_firewall:
             GCPActions().remove_firewall(ssn_conf['firewall_name'])
         if pre_defined_subnet:

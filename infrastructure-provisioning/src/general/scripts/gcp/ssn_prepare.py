@@ -196,6 +196,7 @@ if __name__ == "__main__":
         except:
             print "Service account hasn't been created"
         GCPActions().remove_bucket(ssn_conf['ssn_bucket_name'])
+        GCPActions().remove_bucket(ssn_conf['shared_bucket_name'])
         if pre_defined_firewall:
             GCPActions().remove_firewall(ssn_conf['firewall_name'])
         if pre_defined_subnet:
@@ -224,6 +225,7 @@ if __name__ == "__main__":
         # except:
         #     print "Service account hasn't been created"
         GCPActions().remove_bucket(ssn_conf['ssn_bucket_name'])
+        GCPActions().remove_bucket(ssn_conf['shared_bucket_name'])
         if pre_defined_firewall:
             GCPActions().remove_firewall(ssn_conf['firewall_name'])
         if pre_defined_subnet:
@@ -258,6 +260,7 @@ if __name__ == "__main__":
         # GCPActions().remove_service_account(ssn_conf['service_account_name'])
         GCPActions().remove_static_address(ssn_conf['static_address_name'], ssn_conf['region'])
         GCPActions().remove_bucket(ssn_conf['ssn_bucket_name'])
+        GCPActions().remove_bucket(ssn_conf['shared_bucket_name'])
         if pre_defined_firewall:
             GCPActions().remove_firewall(ssn_conf['firewall_name'])
         if pre_defined_subnet:
