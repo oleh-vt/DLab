@@ -44,7 +44,7 @@ parser.add_argument('--edge_hostname', type=str, default='')
 parser.add_argument('--proxy_port', type=str, default='')
 parser.add_argument('--scala_version', type=str, default='')
 parser.add_argument('--livy_version', type=str, default='')
-parser.add_argument('--multiple_dataengine_services', type=str, default='')
+parser.add_argument('--multiple_clusters', type=str, default='')
 parser.add_argument('--r_mirror', type=str, default='')
 parser.add_argument('--endpoint_url', type=str, default='')
 args = parser.parse_args()
@@ -219,7 +219,7 @@ if __name__ == "__main__":
     ensure_python3_libraries(args.os_user)
     ensure_python3_specific_version(python3_version, args.os_user)
 
-    if args.multiple_dataengine_services == 'true':
+    if args.multiple_clusters == 'true':
         print "Installing Livy for local kernels"
         install_local_livy(args)
         print "Configuring local kernels"

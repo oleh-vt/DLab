@@ -30,6 +30,7 @@ COPY general/templates/${CLOUD}/dataengine-service_interpreter_* /root/templates
 COPY general/templates/${CLOUD}/interpreter_* /root/templates/
 COPY general/templates/os/${OS}/ungit.service /root/templates/
 COPY general/templates/os/notebook_spark-defaults_local.conf /root/templates/
+COPY general/templates/os/core-site.xml /root/templates/
 
 RUN chmod a+x /root/fabfile.py; \
     chmod a+x /root/scripts/*

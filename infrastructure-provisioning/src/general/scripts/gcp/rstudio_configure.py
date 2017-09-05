@@ -59,9 +59,7 @@ if __name__ == "__main__":
     #                                        os.environ['edge_user_name'] + "-nb-Profile"
     # notebook_config['security_group_name'] = os.environ['conf_service_base_name'] + "-" + os.environ[
     #     'edge_user_name'] + "-nb-SG"
-    notebook_config['tag_name'] = notebook_config['service_base_name'] + '-Tag'
-    notebook_config['rstudio_pass'] = id_generator()
-    notebook_config['dlab_ssh_user'] = os.environ['conf_os_user']
+    # notebook_config['tag_name'] = notebook_config['service_base_name'] + '-Tag'
 
     # generating variables regarding EDGE proxy on Notebook instance
     instance_hostname = GCPMeta().get_private_ip_address(notebook_config['instance_name'])
@@ -70,6 +68,8 @@ if __name__ == "__main__":
     notebook_config['ssh_key_path'] = '{0}{1}.pem'.format(os.environ['conf_key_dir'], os.environ['conf_key_name'])
     notebook_config['dlab_ssh_user'] = os.environ['conf_os_user']
     notebook_config['zone'] = os.environ['gcp_zone']
+    notebook_config['rstudio_pass'] = id_generator()
+
     try:
         if os.environ['conf_os_family'] == 'debian':
             initial_user = 'ubuntu'

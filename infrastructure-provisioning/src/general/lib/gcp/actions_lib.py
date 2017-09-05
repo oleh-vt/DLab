@@ -775,7 +775,7 @@ class GCPActions:
             env.host_string = env.user + "@" + env.hosts
             sudo('rm -rf /home/{}/.local/share/jupyter/kernels/*_{}'.format(ssh_user, dataproc_name))
             if exists('/home/{}/.ensure_dir/dataengine-service_{}_interpreter_ensured'.format(ssh_user, dataproc_name)):
-                if os.environ['notebook_multiple_dataengine_services'] == 'true':
+                if os.environ['notebook_multiple_clusters'] == 'true':
                     try:
                         livy_port = sudo("cat /opt/" + dataproc_version + "/" + dataproc_name
                                          + "/livy/conf/livy.conf | grep livy.server.port | tail -n 1 | awk '{printf $3}'")
@@ -831,6 +831,111 @@ class GCPActions:
                                    file=sys.stdout)}))
             traceback.print_exc(file=sys.stdout)
             return ''
+
+    def configure_zeppelin_dataproc_interpreter(self, dataproc_version, cluster_name, spark_dir,
+                                                os_user, yarn_dir, bucket, user_name, multiple_clusters):
+        try:
+            port_number_found = False
+            zeppelin_restarted = False
+            default_port = 8998
+            GCPActions().get_cluster_app_version(bucket, user_name, cluster_name, 'python')
+            with file('/tmp/python_version') as f:
+                python_version = f.read()
+            python_version = python_version[0:5]
+            livy_port = ''
+            livy_path = '/opt/{0}/{1}/livy/'.format(dataproc_version, cluster_name)
+            # spark_libs = "/opt/" + emr_version + "/jars/usr/share/aws/aws-java-sdk/aws-java-sdk-core*.jar /opt/" + \
+            #              emr_version + "/jars/usr/lib/hadoop/hadoop-aws*.jar /opt/" + emr_version + \
+            #              "/jars/usr/share/aws/aws-java-sdk/aws-java-sdk-s3-*.jar /opt/" + emr_version + \
+            #              "/jars/usr/lib/hadoop-lzo/lib/hadoop-lzo-*.jar"
+            local('echo \"Configuring dataproc path for Zeppelin\"')
+            local('sed -i \"s/^export SPARK_HOME.*/export SPARK_HOME=\/opt\/{0}\/{1}\/spark/\" /opt/zeppelin/conf/zeppelin-env.sh'
+                  .format(dataproc_version, cluster_name))
+            local('sed -i \"s/^export HADOOP_CONF_DIR.*/export HADOOP_CONF_DIR=\/opt\/{0}\/{1}\/conf/\" /opt/{0}/{1}/spark/conf/spark-env.sh'
+                  .format(dataproc_version, cluster_name))
+            # local('echo \"spark.jars $(ls ' + spark_libs + ' | tr \'\\n\' \',\')\" >> /opt/' + emr_version + '/' +
+            #       cluster_name + '/spark/conf/spark-defaults.conf')
+            local('sed -i "/spark.executorEnv.PYTHONPATH/d" /opt/{0}/{1}/spark/conf/spark-defaults.conf'.format(dataproc_version, cluster_name))
+            local('sed -i "/spark.yarn.dist.files/d" /opt/{0}/{1}/spark/conf/spark-defaults.conf'.format(dataproc_version, cluster_name))
+            local('sudo chown {0}:{0} -R /opt/zeppelin/'.format(os_user))
+            local('sudo systemctl daemon-reload')
+            local('sudo service zeppelin-notebook stop')
+            local('sudo service zeppelin-notebook start')
+            while not zeppelin_restarted:
+                local('sleep 5')
+                result = local('sudo bash -c "nmap -p 8080 localhost | grep closed > /dev/null" ; echo $?', capture=True)
+                result = result[:1]
+                if result == '1':
+                    zeppelin_restarted = True
+            local('sleep 5')
+            local('echo \"Configuring dataproc spark interpreter for Zeppelin\"')
+            if multiple_clusters == 'true':
+                while not port_number_found:
+                    port_free = local('sudo bash -c "nmap -p ' + str(default_port) +
+                                      ' localhost | grep closed > /dev/null" ; echo $?', capture=True)
+                    port_free = port_free[:1]
+                    if port_free == '0':
+                        livy_port = default_port
+                        port_number_found = True
+                    else:
+                        default_port += 1
+                local('sudo echo "livy.server.port = {0}" >> {1}conf/livy.conf'.format(str(livy_port), livy_path))
+                local('sudo echo "livy.spark.master = yarn" >> {}conf/livy.conf'.format(livy_path))
+                if os.path.exists('{}conf/spark-blacklist.conf'.format(livy_path)):
+                    local('sudo sed -i "s/^/#/g" {}conf/spark-blacklist.conf'.format(livy_path))
+                local('sudo echo "export SPARK_HOME={0}" >> {1}conf/livy-env.sh'.format(spark_dir, livy_path))
+                local('sudo echo "export HADOOP_CONF_DIR={0}" >> {1}conf/livy-env.sh'.format(yarn_dir, livy_path))
+                local('sudo echo "export PYSPARK3_PYTHON=python{0}" >> {1}conf/livy-env.sh'.format(python_version[0:3], livy_path))
+                template_file = "/tmp/dataengine-service_interpreter.json"
+                fr = open(template_file, 'r+')
+                text = fr.read()
+                text = text.replace('CLUSTER_NAME', cluster_name)
+                text = text.replace('SPARK_HOME', spark_dir)
+                text = text.replace('LIVY_PORT', str(livy_port))
+                fw = open(template_file, 'w')
+                fw.write(text)
+                fw.close()
+                for _ in range(5):
+                    try:
+                        local("curl --noproxy localhost -H 'Content-Type: application/json' -X POST -d " +
+                              "@/tmp/dataengine-service_interpreter.json http://localhost:8080/api/interpreter/setting")
+                        break
+                    except:
+                        local('sleep 5')
+                        pass
+                local('sudo cp /opt/livy-server-cluster.service /etc/systemd/system/livy-server-{}.service'.format(str(livy_port)))
+                local("sudo sed -i 's|OS_USER|{0}|' /etc/systemd/system/livy-server-{1}.service".format(os_user, str(livy_port)))
+                local("sudo sed -i 's|LIVY_PATH|{0}|' /etc/systemd/system/livy-server-{1}.service".format(livy_path, str(livy_port)))
+                local('sudo chmod 644 /etc/systemd/system/livy-server-{}.service'.format(str(livy_port)))
+                local('sudo systemctl daemon-reload')
+                local('sudo systemctl enable livy-server-{}'.format(str(livy_port)))
+                local('sudo systemctl start livy-server-{}'.format(str(livy_port)))
+            else:
+                template_file = "/tmp/dataengine-service_interpreter.json"
+                p_versions = ["2", python_version[:3]]
+                for p_version in p_versions:
+                    fr = open(template_file, 'r+')
+                    text = fr.read()
+                    text = text.replace('CLUSTERNAME', cluster_name)
+                    text = text.replace('PYTHONVERSION', p_version)
+                    text = text.replace('SPARK_HOME', spark_dir)
+                    text = text.replace('PYTHONVER_SHORT', p_version[:1])
+                    text = text.replace('DATAENGINE-SERVICE_VERSION', dataproc_version)
+                    tmp_file = '/tmp/dataproc_spark_py{}_interpreter.json'.format(p_version)
+                    fw = open(tmp_file, 'w')
+                    fw.write(text)
+                    fw.close()
+                    for _ in range(5):
+                        try:
+                            local("curl --noproxy localhost -H 'Content-Type: application/json' -X POST -d " +
+                                  "@/tmp/dataproc_spark_py{}_interpreter.json http://localhost:8080/api/interpreter/setting".format(p_version))
+                            break
+                        except:
+                            local('sleep 5')
+                            pass
+            local('touch /home/{0}/.ensure_dir/dataengine-service_{1}_interpreter_ensured'.format(os_user, cluster_name))
+        except:
+            sys.exit(1)
 
     def install_python(self, bucket, user_name, cluster_name, application):
         try:

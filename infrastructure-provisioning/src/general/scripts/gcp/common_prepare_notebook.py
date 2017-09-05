@@ -85,13 +85,13 @@ if __name__ == "__main__":
     else:
         notebook_config['primary_disk_size'] = '12'
     if os.environ['application'] == 'zeppelin':
-        if os.environ['notebook_multiple_dataengine_services'] == 'true':
+        if os.environ['notebook_multiple_clusters'] == 'true':
             notebook_config['expected_ami_name'] = '{0}-{1}-{2}-livy-notebook-image'.format(notebook_config['service_base_name'], notebook_config['edge_user_name'], os.environ['application'])
         else:
             notebook_config['expected_ami_name'] = '{0}-{1}-{2}-spark-notebook-image'.format(notebook_config['service_base_name'], notebook_config['edge_user_name'], os.environ['application'])
     else:
         notebook_config['expected_ami_name'] = '{0}-{1}-{2}-notebook-image'.format(notebook_config['service_base_name'], notebook_config['edge_user_name'], os.environ['application'])
-    notebook_config['role_profile_name'] = '{0}-{1}-nb-Profile'.format(notebook_config['service_base_name'], notebook_config['edge_user_name'])
+    # notebook_config['role_profile_name'] = '{0}-{1}-nb-Profile'.format(notebook_config['service_base_name'], notebook_config['edge_user_name'])
     # notebook_config['security_group_name'] = os.environ['conf_service_base_name'] + "-" + os.environ[
     #     'edge_user_name'] + "-nb-SG"
     # notebook_config['tag_name'] = notebook_config['service_base_name'] + '-Tag'
@@ -113,8 +113,7 @@ if __name__ == "__main__":
         params = "--instance_name {} --region {} --zone {} --vpc_name {} --subnet_name {} --instance_size {} --ssh_key_path {} --initial_user {} --service_account_name {} --ami_name {} --instance_class {} --primary_disk_size {}".\
             format(notebook_config['instance_name'], notebook_config['region'], notebook_config['zone'], notebook_config['vpc_name'],
                    notebook_config['subnet_name'], notebook_config['instance_size'], notebook_config['ssh_key_path'], initial_user,
-                   notebook_config['notebook_service_account_name'], notebook_config['ami_name'], 'notebook',
-                   notebook_config['primary_disk_size'])
+                   notebook_config['notebook_service_account_name'], notebook_config['ami_name'], 'notebook', notebook_config['primary_disk_size'])
         try:
             local("~/scripts/{}.py {}".format('common_create_instance', params))
         except:

@@ -209,7 +209,7 @@ if __name__ == "__main__":
     print "Private IP: " + ip_address
     print "Instance type: " + notebook_config['instance_type']
     print "Key name: " + notebook_config['key_name']
-    print "User key name: " + notebook_config['edge_user_name']
+    print "User key name: " + os.environ['edge_user_name']
     # print "AMI name: " + notebook_config['expected_ami_name']
     # print "Profile name: " + notebook_config['role_profile_name']
     # print "SG name: " + notebook_config['security_group_name']
