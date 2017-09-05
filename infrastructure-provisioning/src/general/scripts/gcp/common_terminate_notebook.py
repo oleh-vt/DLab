@@ -28,7 +28,7 @@ import os
 import uuid
 
 
-def terminate_nb(instance_name, bucket_name, zone, ssh_user, key_path, user_name):
+def terminate_nb(instance_name, bucket_name, zone, user_name):
     print 'Terminating Dataproc cluster and cleaning Dataproc config from bucket'
     try:
         clusters_list = meta_lib.GCPMeta().get_dataproc_list(instance_name)
@@ -39,7 +39,6 @@ def terminate_nb(instance_name, bucket_name, zone, ssh_user, key_path, user_name
                 print 'The bucket {} has been cleaned successfully'.format(bucket_name)
                 actions_lib.GCPActions().delete_dataproc_cluster(cluster_name, os.environ['gcp_region'])
                 print 'The Dataproc cluster {} has been terminated successfully'.format(cluster_name)
-                actions_lib.GCPActions().remove_kernels(instance_name, cluster_name, cluster[0]['version'], ssh_user, key_path)
         else:
             print "There are no Dataproc clusters to terminate."
     except:
@@ -74,8 +73,8 @@ if __name__ == "__main__":
         logging.info('[TERMINATE NOTEBOOK]')
         print '[TERMINATE NOTEBOOK]'
         try:
-            terminate_nb(notebook_config['notebook_name'], notebook_config['bucket_name'], notebook_config['zone'],
-                      os.environ['conf_os_user'], notebook_config['key_path'], notebook_config['user_name'])
+            terminate_nb(notebook_config['notebook_name'], notebook_config['bucket_name'],
+                         notebook_config['zone'], notebook_config['user_name'])
         except Exception as err:
             traceback.print_exc()
             append_result("Failed to terminate notebook.", str(err))
