@@ -785,8 +785,7 @@ class GCPActions:
                         sudo('systemctl disable livy-server-' + livy_port)
                     except:
                         print "Wasn't able to find Livy server for this EMR!"
-                sudo(
-                    'sed -i \"s/^export SPARK_HOME.*/export SPARK_HOME=\/opt\/spark/\" /opt/zeppelin/conf/zeppelin-env.sh')
+                sudo('sed -i \"s/^export SPARK_HOME.*/export SPARK_HOME=\/opt\/spark/\" /opt/zeppelin/conf/zeppelin-env.sh')
                 sudo("rm -rf /home/{}/.ensure_dir/dataengine-service_interpreter_ensure".format(ssh_user))
                 zeppelin_url = 'http://' + notebook_ip + ':8080/api/interpreter/setting/'
                 opener = urllib2.build_opener(urllib2.ProxyHandler({}))
@@ -802,10 +801,9 @@ class GCPActions:
                         request.get_method = lambda: 'DELETE'
                         url = opener.open(request)
                         print url.read()
-                sudo('chown ' + ssh_user + ':' + ssh_user + ' -R /opt/zeppelin/')
+                sudo('chown {0}:{0} -R /opt/zeppelin/'.format(ssh_user))
                 sudo('systemctl daemon-reload')
-                sudo("service zeppelin-notebook stop")
-                sudo("service zeppelin-notebook start")
+                sudo('systemctl restart zeppelin-notebook.service')
                 zeppelin_restarted = False
                 while not zeppelin_restarted:
                     sudo('sleep 5')

@@ -204,7 +204,7 @@ if __name__ == "__main__":
     print "Private IP: " + ip_address
     print "Instance type: " + notebook_config['instance_type']
     print "Key name: " + notebook_config['key_name']
-    print "User key name: " + notebook_config['edge_user_name']
+    print "User key name: " + os.environ['edge_user_name']
     print "Rstudio URL: " + rstudio_ip_url
     print "Rstudio user: " + notebook_config['dlab_ssh_user']
     print "Rstudio pass: " + notebook_config['rstudio_pass']

@@ -237,7 +237,7 @@ if __name__ == "__main__":
     print "Private IP: " + ip_address
     print "Instance type: " + notebook_config['instance_type']
     print "Key name: " + notebook_config['key_name']
-    print "User key name: " + notebook_config['edge_user_name']
+    print "User key name: " + os.environ['edge_user_name']
     print "Zeppelin URL: " + zeppelin_ip_url
     print "Ungit URL: " + ungit_ip_url
     print 'SSH access (from Edge node, via IP address): ssh -i {0}.pem {1}@{2}'\
