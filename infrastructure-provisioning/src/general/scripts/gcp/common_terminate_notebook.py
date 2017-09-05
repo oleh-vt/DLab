@@ -65,7 +65,6 @@ if __name__ == "__main__":
     notebook_config['service_base_name'] = (os.environ['conf_service_base_name']).lower().replace('_', '-')
     notebook_config['notebook_name'] = os.environ['notebook_instance_name']
     notebook_config['bucket_name'] = '{}-ssn-bucket'.format(notebook_config['service_base_name'])
-    notebook_config['key_path'] = '{0}{1}.pem'.format(os.environ['conf_key_dir'], os.environ['conf_key_name'])
     notebook_config['user_name'] = (os.environ['edge_user_name']).lower().replace('_', '-')
     notebook_config['zone'] = os.environ['gcp_zone']
 
