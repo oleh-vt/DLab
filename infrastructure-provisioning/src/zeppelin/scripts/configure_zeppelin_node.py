@@ -130,6 +130,7 @@ def configure_local_livy_kernels(args):
         if exists('/opt/livy/conf/spark-blacklist.conf'):
             sudo('sed -i "s/^/#/g" /opt/livy/conf/spark-blacklist.conf')
         sudo("systemctl start livy-server")
+        sudo("systemctl restart zeppelin-notebook.service")
         sudo('touch /home/' + args.os_user + '/.ensure_dir/local_livy_kernel_ensured')
 
 
@@ -139,6 +140,7 @@ def configure_local_spark_kernels(args):
         sudo('sed -i "s|ENDPOINTURL|' + args.endpoint_url + '|g" /tmp/interpreter.json')
         sudo('sed -i "s|OS_USER|' + args.os_user + '|g" /tmp/interpreter.json')
         sudo('cp -f /tmp/interpreter.json /opt/zeppelin/conf/interpreter.json')
+        sudo("systemctl restart zeppelin-notebook.service")
         sudo('touch /home/' + args.os_user + '/.ensure_dir/local_spark_kernel_ensured')
 
 

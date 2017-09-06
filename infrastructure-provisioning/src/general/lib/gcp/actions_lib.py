@@ -802,7 +802,6 @@ class GCPActions:
                         url = opener.open(request)
                         print url.read()
                 sudo('chown {0}:{0} -R /opt/zeppelin/'.format(ssh_user))
-                sudo('systemctl daemon-reload')
                 sudo('systemctl restart zeppelin-notebook.service')
                 zeppelin_restarted = False
                 while not zeppelin_restarted:
@@ -842,23 +841,15 @@ class GCPActions:
             python_version = python_version[0:5]
             livy_port = ''
             livy_path = '/opt/{0}/{1}/livy/'.format(dataproc_version, cluster_name)
-            # spark_libs = "/opt/" + emr_version + "/jars/usr/share/aws/aws-java-sdk/aws-java-sdk-core*.jar /opt/" + \
-            #              emr_version + "/jars/usr/lib/hadoop/hadoop-aws*.jar /opt/" + emr_version + \
-            #              "/jars/usr/share/aws/aws-java-sdk/aws-java-sdk-s3-*.jar /opt/" + emr_version + \
-            #              "/jars/usr/lib/hadoop-lzo/lib/hadoop-lzo-*.jar"
             local('echo \"Configuring dataproc path for Zeppelin\"')
             local('sed -i \"s/^export SPARK_HOME.*/export SPARK_HOME=\/opt\/{0}\/{1}\/spark/\" /opt/zeppelin/conf/zeppelin-env.sh'
                   .format(dataproc_version, cluster_name))
             local('sed -i \"s/^export HADOOP_CONF_DIR.*/export HADOOP_CONF_DIR=\/opt\/{0}\/{1}\/conf/\" /opt/{0}/{1}/spark/conf/spark-env.sh'
                   .format(dataproc_version, cluster_name))
-            # local('echo \"spark.jars $(ls ' + spark_libs + ' | tr \'\\n\' \',\')\" >> /opt/' + emr_version + '/' +
-            #       cluster_name + '/spark/conf/spark-defaults.conf')
             local('sed -i "/spark.executorEnv.PYTHONPATH/d" /opt/{0}/{1}/spark/conf/spark-defaults.conf'.format(dataproc_version, cluster_name))
             local('sed -i "/spark.yarn.dist.files/d" /opt/{0}/{1}/spark/conf/spark-defaults.conf'.format(dataproc_version, cluster_name))
             local('sudo chown {0}:{0} -R /opt/zeppelin/'.format(os_user))
-            local('sudo systemctl daemon-reload')
-            local('sudo service zeppelin-notebook stop')
-            local('sudo service zeppelin-notebook start')
+            local('sudo systemctl restart zeppelin-notebook.service')
             while not zeppelin_restarted:
                 local('sleep 5')
                 result = local('sudo bash -c "nmap -p 8080 localhost | grep closed > /dev/null" ; echo $?', capture=True)
