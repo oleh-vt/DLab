@@ -189,7 +189,7 @@ def ensure_python3_specific_version(python3_version, os_user):
 def ensure_python2_libraries(os_user):
     if not exists('/home/' + os_user + '/.ensure_dir/python2_libraries_ensured'):
         try:
-            sudo('yum install -y https://forensics.cert.org/centos/cert/7/x86_64/pyparsing-2.0.3-1.el7.noarch.rpm')
+            sudo('pip2 install pyparsing==2.0.3')
             sudo('yum install -y python-setuptools python-wheel')
             sudo('yum install -y python-virtualenv openssl-devel python-devel openssl-libs libxml2-devel libxslt-devel --nogpgcheck')
             try:
@@ -246,8 +246,9 @@ def install_tensor(os_user, tensorflow_version, files_dir, templates_dir):
             sudo('ln -s /opt/cuda-8.0 /usr/local/cuda-8.0')
             sudo('rm -rf /home/' + os_user + '/cuda-repo-rhel7-8-0-local-8.0.44-1.x86_64.rpm')
             # install cuDNN
-            put(files_dir + 'cudnn-8.0-linux-x64-v5.1.tgz', '/tmp/cudnn-8.0-linux-x64-v5.1.tgz')
-            run('tar xvzf /tmp/cudnn-8.0-linux-x64-v5.1.tgz -C /tmp')
+            cudnn = 'cudnn-8.0-linux-x64-v6.0.tgz'
+            run('wget http://developer.download.nvidia.com/compute/redist/cudnn/v6.0/{0} -O /tmp/{0}'.format(cudnn))
+            run('tar xvzf /tmp/{} -C /tmp'.format(cudnn))
             sudo('mkdir -p /opt/cudnn/include')
             sudo('mkdir -p /opt/cudnn/lib64')
             sudo('mv /tmp/cuda/include/cudnn.h /opt/cudnn/include')
