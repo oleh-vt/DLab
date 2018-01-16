@@ -34,6 +34,11 @@
             <artifactId>common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-cloudbilling</artifactId>
+            <version>v1-rev15-1.23.0</version>
+        </dependency>
     </dependencies>
 
     <build>
