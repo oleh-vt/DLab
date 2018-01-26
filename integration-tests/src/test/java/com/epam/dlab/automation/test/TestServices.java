@@ -18,6 +18,7 @@ limitations under the License.
 
 package com.epam.dlab.automation.test;
 
+import com.epam.dlab.automation.cloud.CloudException;
 import com.epam.dlab.automation.helper.CloudHelper;
 import com.epam.dlab.automation.cloud.VirtualMachineStatusChecker;
 import com.epam.dlab.automation.docker.Docker;
@@ -86,11 +87,16 @@ public class TestServices {
 	@Test
 	public void runTest() throws Exception {
 		testJenkinsJob();
-		testLoginSsnService();
+		if(ConfigPropertyValue.getCloudProvider().equalsIgnoreCase(CloudProvider.AZURE_PROVIDER) &&
+				ConfigPropertyValue.getAzureDatalakeEnabled().equalsIgnoreCase("true")){
+			testLoginSsnServiceViaSso();
+		}else{
+			testLoginSsnServiceViaLdap();
+		}
 
 		RestAssured.baseURI = NamingHelper.getSsnURL();
 		NamingHelper.setSsnToken(ssnLoginAndKeyUpload());
-		runTestsInNotebooks();
+		//runTestsInNotebooks();
 	}
 
 	private void testJenkinsJob() throws Exception {
@@ -127,29 +133,8 @@ public class TestServices {
 		return response.getBody();
 	}
 
-	private void testLoginSsnService() throws Exception {
-		// ssnURL = "http://ec2-35-162-89-115.us-west-2.compute.amazonaws.com";
-		String cloudProvider = ConfigPropertyValue.getCloudProvider();
-
-		LOGGER.info("Check status of SSN node on {}: {}", cloudProvider.toUpperCase(), NamingHelper.getSsnName());
-
-		String publicSsnIp = CloudHelper.getInstancePublicIP(NamingHelper.getSsnName(), true);
-		LOGGER.info("Public IP is: {}", publicSsnIp);
-		String privateSsnIp = CloudHelper.getInstancePrivateIP(NamingHelper.getSsnName(), true);
-		LOGGER.info("Private IP is: {}", privateSsnIp);
-		if(publicSsnIp == null || privateSsnIp == null){
-			Assert.fail("There is not any virtual machine in " + cloudProvider + " with name " + NamingHelper.getSsnName());
-			return;
-		}
-		NamingHelper.setSsnIp(PropertiesResolver.DEV_MODE ? publicSsnIp : privateSsnIp);
-        VirtualMachineStatusChecker.checkIfRunning(NamingHelper.getSsnName(), true);
-		LOGGER.info("{} instance state is running", cloudProvider.toUpperCase());
-
-		LOGGER.info("2. Waiting for SSN service ...");
-		Assert.assertEquals(WaitForStatus.selfService(ConfigPropertyValue.getTimeoutSSNStartup()), true,
-				"SSN service was not started");
-		LOGGER.info("   SSN service is available");
-
+	private void testLoginSsnServiceViaLdap() throws CloudException, InterruptedException {
+		checkSsnAvailability();
 		LOGGER.info("3. Check login");
 		final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN);
 		LOGGER.info("   SSN login URL is {}", ssnLoginURL);
@@ -192,9 +177,82 @@ public class TestServices {
 													 */);
 	}
 
+	private void testLoginSsnServiceViaSso() throws CloudException, InterruptedException {
+		checkSsnAvailability();
+		LOGGER.info("3. Check login");
+		final String ssnSsoLoginURL =
+				NamingHelper.getSelfServiceURL(String.format(ApiPath.LOGIN_OAUTH, ConfigPropertyValue.getCloudProvider()));
+		LOGGER.info("   SSN login URL is {}", ssnSsoLoginURL);
+
+		ResponseBody<?> responseBody;
+		// TODO Choose username and password for this check
+		// if (!ConfigPropertyValue.isRunModeLocal()) {
+		// responseBody = login(ConfigPropertyValue.getNotIAMUsername(),
+		// ConfigPropertyValue.getNotIAMPassword(),
+		// HttpStatusCode.UNAUTHORIZED, "Unauthorized user " +
+		// ConfigPropertyValue.getNotIAMUsername());
+		// Assert.assertEquals(responseBody.asString(), "Please contact AWS
+		// administrator to create corresponding IAM User");
+		// }
+
+		responseBody = login(ConfigPropertyValue.getNotDLabUsername(), ConfigPropertyValue.getNotDLabPassword(),
+				HttpStatusCode.UNAUTHORIZED, "Unauthorized user " + ConfigPropertyValue.getNotDLabUsername());
+		Assert.assertEquals(responseBody.asString(), "Username or password are not valid");
+
+		if (!ConfigPropertyValue.isRunModeLocal()) {
+			responseBody = login(ConfigPropertyValue.getUsername(), ".", HttpStatusCode.UNAUTHORIZED,
+					"Unauthorized user " + ConfigPropertyValue.getNotDLabUsername());
+			Assert.assertEquals(responseBody.asString(), "Username or password are not valid");
+		}
+
+		LOGGER.info("Logging in with credentials {}/***", ConfigPropertyValue.getUsername());
+		responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(), HttpStatusCode.OK,
+				"User login " + ConfigPropertyValue.getUsername() + " was not successful");
+
+		LOGGER.info("4. Check logout");
+		final String ssnlogoutURL = NamingHelper.getSelfServiceURL(ApiPath.LOGOUT);
+		LOGGER.info("   SSN logout URL is {}", ssnlogoutURL);
+
+		Response responseLogout = new HttpRequest().webApiPost(ssnlogoutURL, ContentType.ANY);
+		LOGGER.info("responseLogout.statusCode() is {}", responseLogout.statusCode());
+		Assert.assertEquals(responseLogout.statusCode(), HttpStatusCode.UNAUTHORIZED,
+				"User log out was not successful"/*
+				 * Replace to HttpStatusCode.OK when EPMCBDCCSS-938 will be fixed
+				 * and merged
+				 */);
+	}
+
+	private void checkSsnAvailability() throws CloudException, InterruptedException {
+		String cloudProvider = ConfigPropertyValue.getCloudProvider();
+		LOGGER.info("Check status of SSN node on {}: {}", cloudProvider.toUpperCase(), NamingHelper.getSsnName());
+
+		String publicSsnIp = CloudHelper.getInstancePublicIP(NamingHelper.getSsnName(), true);
+		LOGGER.info("Public IP is: {}", publicSsnIp);
+		String privateSsnIp = CloudHelper.getInstancePrivateIP(NamingHelper.getSsnName(), true);
+		LOGGER.info("Private IP is: {}", privateSsnIp);
+		if(publicSsnIp == null || privateSsnIp == null){
+			Assert.fail("There is not any virtual machine in " + cloudProvider + " with name " + NamingHelper.getSsnName());
+			return;
+		}
+		NamingHelper.setSsnIp(PropertiesResolver.DEV_MODE ? publicSsnIp : privateSsnIp);
+		VirtualMachineStatusChecker.checkIfRunning(NamingHelper.getSsnName(), true);
+		LOGGER.info("{} instance state is running", cloudProvider.toUpperCase());
+
+		LOGGER.info("2. Waiting for SSN service ...");
+		Assert.assertEquals(WaitForStatus.selfService(ConfigPropertyValue.getTimeoutSSNStartup()), true,
+				"SSN service was not started");
+		LOGGER.info("   SSN service is available");
+	}
+
 	private String ssnLoginAndKeyUpload() throws Exception {
 		LOGGER.info("5. Login as {} ...", ConfigPropertyValue.getUsername());
-		final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN);
+		final String ssnLoginURL;
+		if(ConfigPropertyValue.getCloudProvider().equalsIgnoreCase(CloudProvider.AZURE_PROVIDER) &&
+				ConfigPropertyValue.getAzureDatalakeEnabled().equalsIgnoreCase("true")){
+			ssnLoginURL = NamingHelper.getSelfServiceURL(String.format(ApiPath.LOGIN_OAUTH, ConfigPropertyValue.getCloudProvider()));
+		}else{
+			ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN);
+		}
 		final String ssnUploadKeyURL = NamingHelper.getSelfServiceURL(ApiPath.UPLOAD_KEY);
 		LOGGER.info("   SSN login URL is {}", ssnLoginURL);
 		LOGGER.info("   SSN upload key URL is {}", ssnUploadKeyURL);

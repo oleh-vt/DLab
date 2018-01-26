@@ -22,6 +22,7 @@ public class ApiPath {
 
     public static final String LOGIN = "/api/user/login";
     public static final String LOGOUT = "/api/user/logout";
+    public static final String LOGIN_OAUTH = "/api/user/%s/oauth";
     public static final String UPLOAD_KEY = "/api/user/access_key"; 
     public static final String AUTHORIZE_USER = "/api/user/authorize";
     public static final String EXP_ENVIRONMENT = "/api/infrastructure_provision/exploratory_environment";
