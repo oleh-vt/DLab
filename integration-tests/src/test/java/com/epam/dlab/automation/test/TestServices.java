@@ -124,10 +124,10 @@ public class TestServices {
 		LOGGER.info("ServiceBaseName is: " + NamingHelper.getServiceBaseName());
 	}
 
-	private ResponseBody<?> login(String username, String password, int expectedStatusCode, String errorMessage) {
-		final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN);
+	private ResponseBody<?> login(String username, String password, String url, int expectedStatusCode, String errorMessage) {
+		//final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN);
 		LoginDto requestBody = new LoginDto(username, password);
-		Response response = new HttpRequest().webApiPost(ssnLoginURL, ContentType.JSON, requestBody);
+		Response response = new HttpRequest().webApiPost(url, ContentType.JSON, requestBody);
 		LOGGER.info("   login response body for user {} is {}", username, response.getBody().asString());
 		Assert.assertEquals(response.statusCode(), expectedStatusCode, errorMessage);
 		return response.getBody();
@@ -150,18 +150,18 @@ public class TestServices {
 		// administrator to create corresponding IAM User");
 		// }
 
-		responseBody = login(ConfigPropertyValue.getNotDLabUsername(), ConfigPropertyValue.getNotDLabPassword(),
+		responseBody = login(ConfigPropertyValue.getNotDLabUsername(), ConfigPropertyValue.getNotDLabPassword(), ssnLoginURL,
 				HttpStatusCode.UNAUTHORIZED, "Unauthorized user " + ConfigPropertyValue.getNotDLabUsername());
 		Assert.assertEquals(responseBody.asString(), "Username or password are not valid");
 
 		if (!ConfigPropertyValue.isRunModeLocal()) {
-			responseBody = login(ConfigPropertyValue.getUsername(), ".", HttpStatusCode.UNAUTHORIZED,
+			responseBody = login(ConfigPropertyValue.getUsername(), ".", ssnLoginURL, HttpStatusCode.UNAUTHORIZED,
 					"Unauthorized user " + ConfigPropertyValue.getNotDLabUsername());
 			Assert.assertEquals(responseBody.asString(), "Username or password are not valid");
 		}
 
 		LOGGER.info("Logging in with credentials {}/***", ConfigPropertyValue.getUsername());
-		responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(), HttpStatusCode.OK,
+		responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(), ssnLoginURL, HttpStatusCode.OK,
 				"User login " + ConfigPropertyValue.getUsername() + " was not successful");
 
 		LOGGER.info("4. Check logout");
@@ -185,28 +185,18 @@ public class TestServices {
 		LOGGER.info("   SSN login URL is {}", ssnSsoLoginURL);
 
 		ResponseBody<?> responseBody;
-		// TODO Choose username and password for this check
-		// if (!ConfigPropertyValue.isRunModeLocal()) {
-		// responseBody = login(ConfigPropertyValue.getNotIAMUsername(),
-		// ConfigPropertyValue.getNotIAMPassword(),
-		// HttpStatusCode.UNAUTHORIZED, "Unauthorized user " +
-		// ConfigPropertyValue.getNotIAMUsername());
-		// Assert.assertEquals(responseBody.asString(), "Please contact AWS
-		// administrator to create corresponding IAM User");
-		// }
-
-		responseBody = login(ConfigPropertyValue.getNotDLabUsername(), ConfigPropertyValue.getNotDLabPassword(),
+		responseBody = login(ConfigPropertyValue.getNotDLabUsername(), ConfigPropertyValue.getNotDLabPassword(), ssnSsoLoginURL,
 				HttpStatusCode.UNAUTHORIZED, "Unauthorized user " + ConfigPropertyValue.getNotDLabUsername());
 		Assert.assertEquals(responseBody.asString(), "Username or password are not valid");
 
 		if (!ConfigPropertyValue.isRunModeLocal()) {
-			responseBody = login(ConfigPropertyValue.getUsername(), ".", HttpStatusCode.UNAUTHORIZED,
+			responseBody = login(ConfigPropertyValue.getUsername(), ".", ssnSsoLoginURL, HttpStatusCode.UNAUTHORIZED,
 					"Unauthorized user " + ConfigPropertyValue.getNotDLabUsername());
 			Assert.assertEquals(responseBody.asString(), "Username or password are not valid");
 		}
 
 		LOGGER.info("Logging in with credentials {}/***", ConfigPropertyValue.getUsername());
-		responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(), HttpStatusCode.OK,
+		responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(), ssnSsoLoginURL, HttpStatusCode.OK,
 				"User login " + ConfigPropertyValue.getUsername() + " was not successful");
 
 		LOGGER.info("4. Check logout");
@@ -257,7 +247,7 @@ public class TestServices {
 		LOGGER.info("   SSN login URL is {}", ssnLoginURL);
 		LOGGER.info("   SSN upload key URL is {}", ssnUploadKeyURL);
 
-		ResponseBody<?> responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(),
+		ResponseBody<?> responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(), ssnLoginURL,
 				HttpStatusCode.OK, "Failed to login");
 		String token = responseBody.asString();
 		LOGGER.info("   Logged in. Obtained token: {}", token);
