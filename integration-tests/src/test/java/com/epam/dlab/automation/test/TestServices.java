@@ -88,7 +88,7 @@ public class TestServices {
 	public void runTest() throws Exception {
 		testJenkinsJob();
 		if(ConfigPropertyValue.getCloudProvider().equalsIgnoreCase(CloudProvider.AZURE_PROVIDER) &&
-				ConfigPropertyValue.getAzureDatalakeEnabled().equalsIgnoreCase("true")){
+				Boolean.valueOf(ConfigPropertyValue.getAzureDatalakeEnabled())){
 			testLoginSsnServiceViaSso();
 		}else{
 			testLoginSsnServiceViaLdap();
