@@ -183,6 +183,12 @@ public class TestServices {
 		final String ssnSsoLoginURL =
 				NamingHelper.getSelfServiceURL(String.format(ApiPath.LOGIN_OAUTH, ConfigPropertyValue.getCloudProvider()));
 		LOGGER.info("   SSN login URL is {}", ssnSsoLoginURL);
+		LOGGER.info("Calling http://host-chap-dl-ssn.eastus2.cloudapp.azure.com/api/user/azure/init ....");
+		String testurl = "http://host-chap-dl-ssn.eastus2.cloudapp.azure.com/api/user/azure/init";
+		Response resp = new HttpRequest().webApiGet(testurl);
+		LOGGER.info("resp.statusCode() is: {}", resp.statusCode());
+		LOGGER.info("Response body is: {}", resp.getBody().asString());
+		LOGGER.info("Headers: {}", resp.headers().asList());
 
 		ResponseBody<?> responseBody;
 		responseBody = login(ConfigPropertyValue.getNotDLabUsername(), ConfigPropertyValue.getNotDLabPassword(), ssnSsoLoginURL,
