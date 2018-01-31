@@ -125,6 +125,12 @@ limitations under the License.
         </dependency>
 
         <dependency>
+            <groupId>com.github.scribejava</groupId>
+            <artifactId>scribejava-apis</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure</artifactId>
             <version>1.5.1</version>
