@@ -7,5 +7,12 @@
     "dataproc.tasks.lease",
     "dataproc.tasks.listInvalidatedLeases",
     "dataproc.tasks.reportStatus",
-    "logging.logEntries.create"
+    "logging.logEntries.create",
+    "storage.buckets.get",
+    "storage.objects.create",
+    "storage.objects.delete",
+    "storage.objects.get",
+    "storage.objects.list",
+    "storage.objects.update"
+
 ]
