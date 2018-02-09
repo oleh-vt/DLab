@@ -14,5 +14,4 @@
     "storage.objects.get",
     "storage.objects.list",
     "storage.objects.update"
-
 ]
