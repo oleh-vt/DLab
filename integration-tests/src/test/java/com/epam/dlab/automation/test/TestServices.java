@@ -19,8 +19,8 @@ limitations under the License.
 package com.epam.dlab.automation.test;
 
 import com.epam.dlab.automation.cloud.CloudException;
-import com.epam.dlab.automation.helper.CloudHelper;
 import com.epam.dlab.automation.cloud.VirtualMachineStatusChecker;
+import com.epam.dlab.automation.cloud.azure.oauth2.AzureAuthFile;
 import com.epam.dlab.automation.docker.Docker;
 import com.epam.dlab.automation.helper.*;
 import com.epam.dlab.automation.http.ApiPath;
@@ -32,6 +32,12 @@ import com.epam.dlab.automation.model.LoginDto;
 import com.epam.dlab.automation.model.NotebookConfig;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.scribejava.apis.MicrosoftAzureActiveDirectoryApi;
+import com.github.scribejava.core.builder.ServiceBuilder;
+import com.github.scribejava.core.model.OAuth2AccessToken;
+import com.github.scribejava.core.model.OAuthRequest;
+import com.github.scribejava.core.model.Verb;
+import com.github.scribejava.core.oauth.OAuth20Service;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.response.ResponseBody;
@@ -43,8 +49,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
@@ -177,45 +187,106 @@ public class TestServices {
 													 */);
 	}
 
-	private void testLoginSsnServiceViaSso() throws CloudException, InterruptedException {
+	private void testLoginSsnServiceViaSso() throws CloudException, InterruptedException, IOException,
+			ExecutionException {
 		checkSsnAvailability();
 		LOGGER.info("3. Check login");
 		final String ssnSsoLoginURL =
 				NamingHelper.getSelfServiceURL(String.format(ApiPath.LOGIN_OAUTH, ConfigPropertyValue.getCloudProvider()));
 		LOGGER.info("   SSN login URL is {}", ssnSsoLoginURL);
-		LOGGER.info("Calling http://host-chap-dl-ssn.eastus2.cloudapp.azure.com/api/user/azure/init ....");
-		String testurl = "http://host-chap-dl-ssn.eastus2.cloudapp.azure.com/api/user/azure/init";
-		Response resp = new HttpRequest().webApiGet(testurl);
-		LOGGER.info("resp.statusCode() is: {}", resp.statusCode());
-		LOGGER.info("Response body is: {}", resp.getBody().asString());
-		LOGGER.info("Headers: {}", resp.headers().asList());
 
-		ResponseBody<?> responseBody;
-		responseBody = login(ConfigPropertyValue.getNotDLabUsername(), ConfigPropertyValue.getNotDLabPassword(), ssnSsoLoginURL,
-				HttpStatusCode.UNAUTHORIZED, "Unauthorized user " + ConfigPropertyValue.getNotDLabUsername());
-		Assert.assertEquals(responseBody.asString(), "Username or password are not valid");
 
-		if (!ConfigPropertyValue.isRunModeLocal()) {
-			responseBody = login(ConfigPropertyValue.getUsername(), ".", ssnSsoLoginURL, HttpStatusCode.UNAUTHORIZED,
-					"Unauthorized user " + ConfigPropertyValue.getNotDLabUsername());
-			Assert.assertEquals(responseBody.asString(), "Username or password are not valid");
+		final String PROTECTED_RESOURCE_URL = "https://graph.windows.net/me?api-version=1.6";
+
+		Path path = Paths.get(ConfigPropertyValue.getAzureAuthFileName());
+		if (path.toFile().exists()) {
+
+			AzureAuthFile azureAuthFile;
+			try {
+				azureAuthFile = new ObjectMapper().readValue(path.toFile(), AzureAuthFile.class);
+			} catch (IOException e) {
+				LOGGER.error("Cannot read Azure authentication file", e);
+				throw e;
+			}
+			LOGGER.info("Configs from auth file are used");
+
+			// Replace these with your client id and secret
+			final OAuth20Service service = new ServiceBuilder(azureAuthFile.getClientId())
+					.apiSecret(azureAuthFile.getClientSecret())
+					.scope("openid")
+					.callback(ssnSsoLoginURL)
+					.responseType("code")
+					.build(MicrosoftAzureActiveDirectoryApi.instance());
+			final Scanner in = new Scanner(System.in, "UTF-8");
+
+			// Obtain the Authorization URL
+			System.out.println("Fetching the Authorization URL...");
+			final String authorizationUrl = service.getAuthorizationUrl();
+			System.out.println("Got the Authorization URL!");
+			System.out.println("Now go and authorize ScribeJava here:");
+			System.out.println(authorizationUrl);
+			System.out.println("And paste the authorization code here");
+			System.out.print(">>");
+			final String code = in.nextLine();
+			System.out.println();
+
+			// Trade the Request Token and Verfier for the Access Token
+			System.out.println("Trading the Request Token for an Access Token...");
+			final OAuth2AccessToken accessToken = service.getAccessToken(code);
+			System.out.println("Got the Access Token!");
+			System.out.println("(The raw response looks like this: " + accessToken.getRawResponse() + "')");
+			System.out.println();
+
+			// Now let's go and ask for a protected resource!
+			System.out.println("Now we're going to access a protected resource...");
+			final OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL);
+			service.signRequest(accessToken, request);
+			final com.github.scribejava.core.model.Response response = service.execute(request);
+			System.out.println("Got it! Lets see what we found...");
+			System.out.println();
+			System.out.println(response.getCode());
+			System.out.println(response.getBody());
+
+			System.out.println();
+			System.out.println("Thats it man! Go and build something awesome with ScribeJava! :)");
 		}
 
-		LOGGER.info("Logging in with credentials {}/***", ConfigPropertyValue.getUsername());
-		responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(), ssnSsoLoginURL, HttpStatusCode.OK,
-				"User login " + ConfigPropertyValue.getUsername() + " was not successful");
 
-		LOGGER.info("4. Check logout");
-		final String ssnlogoutURL = NamingHelper.getSelfServiceURL(ApiPath.LOGOUT);
-		LOGGER.info("   SSN logout URL is {}", ssnlogoutURL);
-
-		Response responseLogout = new HttpRequest().webApiPost(ssnlogoutURL, ContentType.ANY);
-		LOGGER.info("responseLogout.statusCode() is {}", responseLogout.statusCode());
-		Assert.assertEquals(responseLogout.statusCode(), HttpStatusCode.UNAUTHORIZED,
-				"User log out was not successful"/*
-				 * Replace to HttpStatusCode.OK when EPMCBDCCSS-938 will be fixed
-				 * and merged
-				 */);
+//		LOGGER.info("Calling http://host-chap-dl-ssn.eastus2.cloudapp.azure.com/api/user/azure/init ....");
+//		String testurl = "http://host-chap-dl-ssn.eastus2.cloudapp.azure.com/api/user/azure/init";
+//		Response resp = new HttpRequest().webApiGet(testurl);
+//		LOGGER.info("resp.statusCode() is: {}", resp.statusCode());
+//		LOGGER.info("Response body is: {}", resp.getBody().asString());
+//		LOGGER.info("Headers: {}", resp.headers().asList());
+//
+//		ResponseBody<?> responseBody;
+//		responseBody = login(ConfigPropertyValue.getNotDLabUsername(), ConfigPropertyValue.getNotDLabPassword(),
+// ssnSsoLoginURL,
+//				HttpStatusCode.UNAUTHORIZED, "Unauthorized user " + ConfigPropertyValue.getNotDLabUsername());
+//		Assert.assertEquals(responseBody.asString(), "Username or password are not valid");
+//
+//		if (!ConfigPropertyValue.isRunModeLocal()) {
+//			responseBody = login(ConfigPropertyValue.getUsername(), ".", ssnSsoLoginURL, HttpStatusCode.UNAUTHORIZED,
+//					"Unauthorized user " + ConfigPropertyValue.getNotDLabUsername());
+//			Assert.assertEquals(responseBody.asString(), "Username or password are not valid");
+//		}
+//
+//		LOGGER.info("Logging in with credentials {}/***", ConfigPropertyValue.getUsername());
+//		responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(), ssnSsoLoginURL,
+// HttpStatusCode.OK,
+//				"User login " + ConfigPropertyValue.getUsername() + " was not successful");
+//
+//		LOGGER.info("4. Check logout");
+//		final String ssnlogoutURL = NamingHelper.getSelfServiceURL(ApiPath.LOGOUT);
+//		LOGGER.info("   SSN logout URL is {}", ssnlogoutURL);
+//
+//		Response responseLogout = new HttpRequest().webApiPost(ssnlogoutURL, ContentType.ANY);
+//		LOGGER.info("responseLogout.statusCode() is {}", responseLogout.statusCode());
+//		Assert.assertEquals(responseLogout.statusCode(), HttpStatusCode.UNAUTHORIZED,
+//				"User log out was not successful"/*
+//				 * Replace to HttpStatusCode.OK when EPMCBDCCSS-938 will be fixed
+//				 * and merged
+//				 */);
 	}
 
 	private void checkSsnAvailability() throws CloudException, InterruptedException {
