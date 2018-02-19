@@ -24,15 +24,16 @@ public class AzureActiveDirectoryApi extends DefaultApi20 {
     private static final String SLASH = "/";
     private static final String COMMON = "common";
     private static final String TOKEN_URI = "oauth2/token";
-    private static final String AUTH_URI = "oauth2/authorize?resource=" + MSFT_GRAPH_URL;
+    private static final String AUTH_URI = "oauth2/authorize?";
+    private static final String CLIENT_ID = "client_id=";
+    private static final String REDIRECT_URI = "redirect_uri=";
+    private static final String RESPONSE_TYPE = "response_type=";
+    private static final String RESPONSE_MODE = "response_mode=";
+    private static final String PROMPT = "prompt=";
+    private String tenantId;
 
-    private static class InstanceHolder {
-
-        private static final AzureActiveDirectoryApi INSTANCE = new AzureActiveDirectoryApi();
-    }
-
-    public static AzureActiveDirectoryApi instance() {
-        return InstanceHolder.INSTANCE;
+    public AzureActiveDirectoryApi(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     @Override
@@ -42,7 +43,7 @@ public class AzureActiveDirectoryApi extends DefaultApi20 {
 
     @Override
     protected String getAuthorizationBaseUrl() {
-        return MSFT_LOGIN_URL + SLASH + COMMON + SLASH + AUTH_URI;
+        return MSFT_LOGIN_URL + SLASH + tenantId + SLASH + AUTH_URI;
     }
 
     @Override

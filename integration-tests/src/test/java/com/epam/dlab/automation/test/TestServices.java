@@ -20,6 +20,7 @@ package com.epam.dlab.automation.test;
 
 import com.epam.dlab.automation.cloud.CloudException;
 import com.epam.dlab.automation.cloud.VirtualMachineStatusChecker;
+import com.epam.dlab.automation.cloud.azure.oauth2.AzureActiveDirectoryApi;
 import com.epam.dlab.automation.cloud.azure.oauth2.AzureAuthFile;
 import com.epam.dlab.automation.docker.Docker;
 import com.epam.dlab.automation.helper.*;
@@ -32,7 +33,6 @@ import com.epam.dlab.automation.model.LoginDto;
 import com.epam.dlab.automation.model.NotebookConfig;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.scribejava.apis.MicrosoftAzureActiveDirectoryApi;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.model.OAuthRequest;
@@ -53,7 +53,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -195,6 +194,7 @@ public class TestServices {
 				NamingHelper.getSelfServiceURL(String.format(ApiPath.LOGIN_OAUTH, ConfigPropertyValue.getCloudProvider()));
 		LOGGER.info("   SSN login URL is {}", ssnSsoLoginURL);
 
+		final String ssnSsoLoginURL1 = "https://host-dlab1271sh-ssn.eastus2.cloudapp.azure.com";
 
 		final String PROTECTED_RESOURCE_URL = "https://graph.windows.net/me?api-version=1.6";
 
@@ -210,29 +210,42 @@ public class TestServices {
 			}
 			LOGGER.info("Configs from auth file are used");
 
+//			String azureLoginUrl = String.format("%s/%s/oauth2/authorize?client_id=%s&redirect_uri=%s&response_type
+// =code" +
+//							"&response_mode=%s&prompt=%s&state=%s",
+//
+//					azureLoginConfiguration.getAuthority(),
+//					azureLoginConfiguration.getTenant(),
+//					azureLoginConfiguration.getClientId(),
+//					URLEncoder.encode(azureLoginConfiguration.getRedirectUrl(), "UTF-8"),
+//					azureLoginConfiguration.getResponseMode(),
+//					prompt,
+//					state);
+
 			// Replace these with your client id and secret
 			final OAuth20Service service = new ServiceBuilder(azureAuthFile.getClientId())
 					.apiSecret(azureAuthFile.getClientSecret())
 					.scope("openid")
-					.callback(ssnSsoLoginURL)
+					.callback(ssnSsoLoginURL1)
 					.responseType("code")
-					.build(MicrosoftAzureActiveDirectoryApi.instance());
-			final Scanner in = new Scanner(System.in, "UTF-8");
+					.state("azure_state_12345")
+					.build(new AzureActiveDirectoryApi(azureAuthFile.getTenantId()));
 
 			// Obtain the Authorization URL
 			System.out.println("Fetching the Authorization URL...");
 			final String authorizationUrl = service.getAuthorizationUrl();
 			System.out.println("Got the Authorization URL!");
-			System.out.println("Now go and authorize ScribeJava here:");
 			System.out.println(authorizationUrl);
-			System.out.println("And paste the authorization code here");
-			System.out.print(">>");
-			final String code = in.nextLine();
+
+			Response responseTest = new HttpRequest().webApiGet(authorizationUrl);
+			LOGGER.info("response.statusCode() is {}", responseTest.statusCode());
+
+			final String authCode = "";
 			System.out.println();
 
 			// Trade the Request Token and Verfier for the Access Token
 			System.out.println("Trading the Request Token for an Access Token...");
-			final OAuth2AccessToken accessToken = service.getAccessToken(code);
+			final OAuth2AccessToken accessToken = service.getAccessToken(authCode);
 			System.out.println("Got the Access Token!");
 			System.out.println("(The raw response looks like this: " + accessToken.getRawResponse() + "')");
 			System.out.println();
@@ -247,8 +260,7 @@ public class TestServices {
 			System.out.println(response.getCode());
 			System.out.println(response.getBody());
 
-			System.out.println();
-			System.out.println("Thats it man! Go and build something awesome with ScribeJava! :)");
+
 		}
 
 
