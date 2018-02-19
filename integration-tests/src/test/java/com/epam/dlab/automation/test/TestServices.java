@@ -20,7 +20,6 @@ package com.epam.dlab.automation.test;
 
 import com.epam.dlab.automation.cloud.CloudException;
 import com.epam.dlab.automation.cloud.VirtualMachineStatusChecker;
-import com.epam.dlab.automation.cloud.azure.oauth2.AzureActiveDirectoryApi;
 import com.epam.dlab.automation.cloud.azure.oauth2.AzureAuthFile;
 import com.epam.dlab.automation.docker.Docker;
 import com.epam.dlab.automation.helper.*;
@@ -33,6 +32,7 @@ import com.epam.dlab.automation.model.LoginDto;
 import com.epam.dlab.automation.model.NotebookConfig;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.scribejava.apis.MicrosoftAzureActiveDirectoryApi;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.model.OAuthRequest;
@@ -194,7 +194,7 @@ public class TestServices {
 				NamingHelper.getSelfServiceURL(String.format(ApiPath.LOGIN_OAUTH, ConfigPropertyValue.getCloudProvider()));
 		LOGGER.info("   SSN login URL is {}", ssnSsoLoginURL);
 
-		final String ssnSsoLoginURL1 = "https://host-dlab1271sh-ssn.eastus2.cloudapp.azure.com";
+		final String ssnSsoLoginURL2 = "https://host-dlab1271sh-ssn.eastus2.cloudapp.azure.com/api/user/azure/oauth";
 
 		final String PROTECTED_RESOURCE_URL = "https://graph.windows.net/me?api-version=1.6";
 
@@ -210,26 +210,13 @@ public class TestServices {
 			}
 			LOGGER.info("Configs from auth file are used");
 
-//			String azureLoginUrl = String.format("%s/%s/oauth2/authorize?client_id=%s&redirect_uri=%s&response_type
-// =code" +
-//							"&response_mode=%s&prompt=%s&state=%s",
-//
-//					azureLoginConfiguration.getAuthority(),
-//					azureLoginConfiguration.getTenant(),
-//					azureLoginConfiguration.getClientId(),
-//					URLEncoder.encode(azureLoginConfiguration.getRedirectUrl(), "UTF-8"),
-//					azureLoginConfiguration.getResponseMode(),
-//					prompt,
-//					state);
-
-			// Replace these with your client id and secret
 			final OAuth20Service service = new ServiceBuilder(azureAuthFile.getClientId())
 					.apiSecret(azureAuthFile.getClientSecret())
 					.scope("openid")
-					.callback(ssnSsoLoginURL1)
+					.callback(ssnSsoLoginURL2)
 					.responseType("code")
 					.state("azure_state_12345")
-					.build(new AzureActiveDirectoryApi(azureAuthFile.getTenantId()));
+					.build(MicrosoftAzureActiveDirectoryApi.instance());
 
 			// Obtain the Authorization URL
 			System.out.println("Fetching the Authorization URL...");
@@ -239,6 +226,8 @@ public class TestServices {
 
 			Response responseTest = new HttpRequest().webApiGet(authorizationUrl);
 			LOGGER.info("response.statusCode() is {}", responseTest.statusCode());
+			LOGGER.info("response.headers() are {}", responseTest.headers());
+			LOGGER.info("response.body() is {}", responseTest.getBody().asString());
 
 			final String authCode = "";
 			System.out.println();
@@ -260,45 +249,7 @@ public class TestServices {
 			System.out.println(response.getCode());
 			System.out.println(response.getBody());
 
-
 		}
-
-
-//		LOGGER.info("Calling http://host-chap-dl-ssn.eastus2.cloudapp.azure.com/api/user/azure/init ....");
-//		String testurl = "http://host-chap-dl-ssn.eastus2.cloudapp.azure.com/api/user/azure/init";
-//		Response resp = new HttpRequest().webApiGet(testurl);
-//		LOGGER.info("resp.statusCode() is: {}", resp.statusCode());
-//		LOGGER.info("Response body is: {}", resp.getBody().asString());
-//		LOGGER.info("Headers: {}", resp.headers().asList());
-//
-//		ResponseBody<?> responseBody;
-//		responseBody = login(ConfigPropertyValue.getNotDLabUsername(), ConfigPropertyValue.getNotDLabPassword(),
-// ssnSsoLoginURL,
-//				HttpStatusCode.UNAUTHORIZED, "Unauthorized user " + ConfigPropertyValue.getNotDLabUsername());
-//		Assert.assertEquals(responseBody.asString(), "Username or password are not valid");
-//
-//		if (!ConfigPropertyValue.isRunModeLocal()) {
-//			responseBody = login(ConfigPropertyValue.getUsername(), ".", ssnSsoLoginURL, HttpStatusCode.UNAUTHORIZED,
-//					"Unauthorized user " + ConfigPropertyValue.getNotDLabUsername());
-//			Assert.assertEquals(responseBody.asString(), "Username or password are not valid");
-//		}
-//
-//		LOGGER.info("Logging in with credentials {}/***", ConfigPropertyValue.getUsername());
-//		responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(), ssnSsoLoginURL,
-// HttpStatusCode.OK,
-//				"User login " + ConfigPropertyValue.getUsername() + " was not successful");
-//
-//		LOGGER.info("4. Check logout");
-//		final String ssnlogoutURL = NamingHelper.getSelfServiceURL(ApiPath.LOGOUT);
-//		LOGGER.info("   SSN logout URL is {}", ssnlogoutURL);
-//
-//		Response responseLogout = new HttpRequest().webApiPost(ssnlogoutURL, ContentType.ANY);
-//		LOGGER.info("responseLogout.statusCode() is {}", responseLogout.statusCode());
-//		Assert.assertEquals(responseLogout.statusCode(), HttpStatusCode.UNAUTHORIZED,
-//				"User log out was not successful"/*
-//				 * Replace to HttpStatusCode.OK when EPMCBDCCSS-938 will be fixed
-//				 * and merged
-//				 */);
 	}
 
 	private void checkSsnAvailability() throws CloudException, InterruptedException {
