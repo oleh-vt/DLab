@@ -576,7 +576,7 @@ class AzureActions:
                             'os_disk': {
                                 'os_type': 'Linux',
                                 'name': '{}-{}-edge-disk0'.format(service_base_name, user_name),
-                                'create_option': create_option,
+                                'create_option': DiskCreateOptionTypes.attach,
                                 'disk_size_gb': int(primary_disk_size),
                                 'tags': tags,
                                 'managed_disk': {
