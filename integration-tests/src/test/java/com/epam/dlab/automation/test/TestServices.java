@@ -18,7 +18,9 @@ limitations under the License.
 
 package com.epam.dlab.automation.test;
 
+import com.epam.dlab.automation.cloud.CloudException;
 import com.epam.dlab.automation.cloud.VirtualMachineStatusChecker;
+import com.epam.dlab.automation.cloud.azure.AzureAuthData;
 import com.epam.dlab.automation.docker.Docker;
 import com.epam.dlab.automation.helper.*;
 import com.epam.dlab.automation.http.ApiPath;
@@ -33,6 +35,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.response.ResponseBody;
+import com.microsoft.azure.datalake.store.oauth2.AzureADAuthenticator;
+import com.microsoft.azure.datalake.store.oauth2.AzureADToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
@@ -41,6 +45,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -87,11 +93,18 @@ public class TestServices {
 	@Test
 	public void runTest() throws Exception {
 		testJenkinsJob();
-		testLoginSsnService();
-
+		boolean oauth2AuthenticationRequired =
+				ConfigPropertyValue.getCloudProvider().equals(CloudProvider.AZURE_PROVIDER) &&
+						Boolean.valueOf(ConfigPropertyValue.getAzureDatalakeEnabled());
+		if (oauth2AuthenticationRequired) {
+			testLoginSsnServiceViaSso();
+		} else {
+			testLoginSsnServiceViaLdap();
+		}
+		testLogoutSsnService();
 		RestAssured.baseURI = NamingHelper.getSsnURL();
-		NamingHelper.setSsnToken(ssnLoginAndKeyUpload());
-		runTestsInNotebooks();
+		NamingHelper.setSsnToken(ssnLoginAndKeyUpload(oauth2AuthenticationRequired));
+		//runTestsInNotebooks();
 	}
 
 	private void testJenkinsJob() throws Exception {
@@ -128,10 +141,8 @@ public class TestServices {
 		return response.getBody();
 	}
 
-	private void testLoginSsnService() throws Exception {
-
+	private void checkSsnAvailability() throws CloudException, InterruptedException, IOException {
 		String cloudProvider = ConfigPropertyValue.getCloudProvider();
-
 		LOGGER.info("Check status of SSN node on {}: {}", cloudProvider.toUpperCase(), NamingHelper.getSsnName());
 
 		String publicSsnIp = CloudHelper.getInstancePublicIP(NamingHelper.getSsnName(), true);
@@ -143,13 +154,48 @@ public class TestServices {
 			return;
 		}
 		NamingHelper.setSsnIp(PropertiesResolver.DEV_MODE ? publicSsnIp : privateSsnIp);
-        VirtualMachineStatusChecker.checkIfRunning(NamingHelper.getSsnName(), true);
+		VirtualMachineStatusChecker.checkIfRunning(NamingHelper.getSsnName(), true);
 		LOGGER.info("{} instance state is running", cloudProvider.toUpperCase());
 
 		LOGGER.info("2. Waiting for SSN service ...");
 		Assert.assertEquals(WaitForStatus.selfService(ConfigPropertyValue.getTimeoutSSNStartup()), true,
 				"SSN service was not started");
 		LOGGER.info("   SSN service is available");
+	}
+
+	private void testLoginSsnServiceViaSso() throws InterruptedException, CloudException, IOException {
+		checkSsnAvailability();
+		LOGGER.info("3. Waiting for authentication token...");
+		Path path = Paths.get(ConfigPropertyValue.getAzureAuthFileName());
+		if (path.toFile().exists()) {
+
+			AzureAuthData azureAuthData;
+			try {
+				azureAuthData = new ObjectMapper().readValue(path.toFile(), AzureAuthData.class);
+			} catch (IOException e) {
+				LOGGER.error("Cannot read from Azure authentication file", e);
+				throw e;
+			}
+			LOGGER.info("Configs from auth file are used");
+			AzureADToken token = AzureADAuthenticator
+					.getTokenUsingClientCreds(azureAuthData.getActiveDirectoryEndpointUrl(),
+							azureAuthData.getClientId(), azureAuthData.getClientSecret());
+			LOGGER.info("Obtained token {} with date of expire {}", token.accessToken, token.expiry);
+			NamingHelper.setSsnToken(token.accessToken);
+			LOGGER.info("3a. Check login");
+			final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN_OAUTH);
+			LOGGER.info("   SSN login URL is {}", ssnLoginURL);
+			Response response = new HttpRequest().webApiPost(ssnLoginURL, ContentType.ANY, token.accessToken);
+			LOGGER.info("   login via SSO response body for user {} is {}", ConfigPropertyValue.getUsername(),
+					response.getBody().asString());
+			Assert.assertEquals(response.statusCode(), HttpStatusCode.OK, "User login " +
+					ConfigPropertyValue.getUsername() + " via SSO was not successful");
+			LOGGER.info("Test login via SSO finished successfully");
+		}
+	}
+
+	private void testLoginSsnServiceViaLdap() throws InterruptedException, CloudException, IOException {
+		checkSsnAvailability();
 
 		LOGGER.info("3. Check login");
 		final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN);
@@ -179,7 +225,9 @@ public class TestServices {
 		LOGGER.info("Logging in with credentials {}/***", ConfigPropertyValue.getUsername());
 		responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(), HttpStatusCode.OK,
 				"User login " + ConfigPropertyValue.getUsername() + " was not successful");
+	}
 
+	private void testLogoutSsnService() {
 		LOGGER.info("4. Check logout");
 		final String ssnlogoutURL = NamingHelper.getSelfServiceURL(ApiPath.LOGOUT);
 		LOGGER.info("   SSN logout URL is {}", ssnlogoutURL);
@@ -187,23 +235,24 @@ public class TestServices {
 		Response responseLogout = new HttpRequest().webApiPost(ssnlogoutURL, ContentType.ANY);
 		LOGGER.info("responseLogout.statusCode() is {}", responseLogout.statusCode());
 		Assert.assertEquals(responseLogout.statusCode(), HttpStatusCode.UNAUTHORIZED,
-				"User log out was not successful"/*
-													 * Replace to HttpStatusCode.OK when EPMCBDCCSS-938 will be fixed
-													 * and merged
-													 */);
+				"User log out was not successful");
 	}
 
-	private String ssnLoginAndKeyUpload() throws Exception {
-		LOGGER.info("5. Login as {} ...", ConfigPropertyValue.getUsername());
-		final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN);
+	private String ssnLoginAndKeyUpload(boolean oauth2AuthenticationRequired) throws Exception {
+		String token;
+		if (!oauth2AuthenticationRequired) {
+			LOGGER.info("5. Login as {} ...", ConfigPropertyValue.getUsername());
+			final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN);
+			LOGGER.info("   SSN login URL is {}", ssnLoginURL);
+			ResponseBody<?> responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(),
+					HttpStatusCode.OK, "Failed to login");
+			token = responseBody.asString();
+			LOGGER.info("   Logged in. Obtained token: {}", token);
+		} else {
+			token = NamingHelper.getSsnToken();
+		}
 		final String ssnUploadKeyURL = NamingHelper.getSelfServiceURL(ApiPath.UPLOAD_KEY);
-		LOGGER.info("   SSN login URL is {}", ssnLoginURL);
 		LOGGER.info("   SSN upload key URL is {}", ssnUploadKeyURL);
-
-		ResponseBody<?> responseBody = login(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword(),
-				HttpStatusCode.OK, "Failed to login");
-		String token = responseBody.asString();
-		LOGGER.info("   Logged in. Obtained token: {}", token);
 
 		LOGGER.info("5.a Checking for user Key...");
 		Response respCheckKey = new HttpRequest().webApiGet(ssnUploadKeyURL, token);
