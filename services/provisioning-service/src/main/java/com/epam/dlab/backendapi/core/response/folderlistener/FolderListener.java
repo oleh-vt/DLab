@@ -19,19 +19,17 @@ limitations under the License.
 
 package com.epam.dlab.backendapi.core.response.folderlistener;
 
-import static com.epam.dlab.backendapi.core.Constants.JSON_EXTENSION;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.epam.dlab.backendapi.core.FileHandlerCallback;
 import com.epam.dlab.backendapi.core.response.folderlistener.WatchItem.ItemStatus;
 import com.epam.dlab.exceptions.DlabException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.epam.dlab.backendapi.core.Constants.JSON_EXTENSION;
 
 /** Listen the directories for the files creation and runs the file processing by {@link AsyncFileHandler}.
  */
@@ -306,15 +304,12 @@ public class FolderListener implements Runnable {
 	 */
 	private String [] getNewFiles() {
 		File dir = new File(getDirectoryName());
-		String[] list = dir.list(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				if (name.toLowerCase().endsWith(JSON_EXTENSION)) {
-					WatchItem item = itemList.getItem(name);
-					return (item != null && item.getStatus() == ItemStatus.WAIT_FOR_FILE);
-				}
-				return false;
+		String[] list = dir.list((dir1, name) -> {
+			if (name.toLowerCase().endsWith(JSON_EXTENSION)) {
+				WatchItem item = itemList.getItem(name);
+				return (item != null && item.getStatus() == ItemStatus.WAIT_FOR_FILE);
 			}
+			return false;
 		});
 		return list;
 	}

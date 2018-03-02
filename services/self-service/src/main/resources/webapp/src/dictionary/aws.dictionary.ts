@@ -25,14 +25,13 @@ export const NAMING_CONVENTION = {
     'account': '',
     'container': '',
     'data_engine': 'Deploy Spark Server / Deploy EMR',
-
+    'image': 'AMI',
     'data_engine_master_instance_size': 'Master instance shape',
     'data_engine_slave_instance_size': 'Slave instance shape',
     'master_node_shape': 'master_node_shape',
     'slave_node_shape': 'slave_node_shape',
     'total_instance_number': 'total_instance_number',
-
-    'spot_instance': 'Spot instance ',
+    'spot_instance': 'Spot instance',
     'billing': {
         'resourceName': 'resource_name',
         'cost': 'cost',

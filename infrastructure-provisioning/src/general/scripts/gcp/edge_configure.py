@@ -45,7 +45,7 @@ if __name__ == "__main__":
             edge_conf['vpc_name'] = os.environ['gcp_vpc_name']
     except KeyError:
         edge_conf['vpc_name'] = edge_conf['service_base_name'] + '-ssn-vpc'
-    edge_conf['vpc_cidr'] = '10.10.0.0/16'
+    edge_conf['vpc_cidr'] = os.environ['conf_vpc_cidr']
     edge_conf['subnet_name'] = '{0}-{1}-subnet'.format(edge_conf['service_base_name'], edge_conf['edge_user_name'])
     edge_conf['region'] = os.environ['gcp_region']
     edge_conf['zone'] = os.environ['gcp_zone']
@@ -66,7 +66,6 @@ if __name__ == "__main__":
     edge_conf['shared_bucket_name'] = '{}-shared-bucket'.format(edge_conf['service_base_name'])
     edge_conf['instance_size'] = os.environ['gcp_edge_instance_size']
     edge_conf['ssh_key_path'] = '{0}{1}.pem'.format(os.environ['conf_key_dir'], os.environ['conf_key_name'])
-    edge_conf['ami_name'] = os.environ['gcp_' + os.environ['conf_os_family'] + '_ami_name']
     edge_conf['static_address_name'] = '{0}-{1}-ip'.format(edge_conf['service_base_name'], edge_conf['edge_user_name'])
     instance_hostname = GCPMeta().get_instance_public_ip_by_name(edge_conf['instance_name'])
     edge_conf['dlab_ssh_user'] = os.environ['conf_os_user']
