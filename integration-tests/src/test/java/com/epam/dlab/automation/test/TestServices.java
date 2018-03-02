@@ -142,7 +142,7 @@ public class TestServices {
 		return response.getBody();
 	}
 
-	private void testLoginSsnServiceViaLdap() throws CloudException, InterruptedException {
+	private void testLoginSsnServiceViaLdap() throws CloudException, InterruptedException, IOException {
 		checkSsnAvailability();
 		LOGGER.info("3. Check login");
 		final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN);
@@ -252,7 +252,7 @@ public class TestServices {
 		}
 	}
 
-	private void checkSsnAvailability() throws CloudException, InterruptedException {
+	private void checkSsnAvailability() throws CloudException, InterruptedException, IOException {
 		String cloudProvider = ConfigPropertyValue.getCloudProvider();
 		LOGGER.info("Check status of SSN node on {}: {}", cloudProvider.toUpperCase(), NamingHelper.getSsnName());
 
