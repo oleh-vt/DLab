@@ -21,7 +21,6 @@ package com.epam.dlab.automation.helper;
 import com.epam.dlab.automation.cloud.CloudException;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -203,7 +202,7 @@ public class NamingHelper {
     }
 
 	public static String getClusterName(String clusterInstanceName, String dataEngineType, boolean restrictionMode)
-			throws CloudException, IOException, GeneralSecurityException {
+			throws CloudException, IOException {
 		switch (ConfigPropertyValue.getCloudProvider()) {
 			case CloudProvider.AWS_PROVIDER:
 			case CloudProvider.AZURE_PROVIDER:
