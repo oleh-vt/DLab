@@ -182,7 +182,7 @@ public class TestServices {
 					"%s/%s/oauth2/authorize", azureAuthData.getActiveDirectoryEndpointUrl(), azureAuthData.getTenantId
 							());
 			Response response =
-					new HttpRequest().webApiPost(authCodeUrl, ContentType.JSON, azureAuthData.getClientId());
+					new HttpRequest().webApiPost(authCodeUrl, ContentType.FORMDATA, azureAuthData.getClientId());
 			LOGGER.info("Auth code response body: {}", response.getBody().asString());
 
 			String accessTokenEndpoint = String.format("%s/%s/oauth2/token",
