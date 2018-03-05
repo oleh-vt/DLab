@@ -177,10 +177,9 @@ public class TestServices {
 			}
 			LOGGER.info("Configs from auth file are used");
 
-			String appId = "6c3410d9-9867-4e35-abed-0eab8dd00e61";
 			AuthenticationResult result = getAccessTokenFromUserCredentials(ConfigPropertyValue.getUsername(),
 					ConfigPropertyValue.getPassword(), azureAuthData.getActiveDirectoryEndpointUrl(),
-					azureAuthData.getTenantId(), appId, azureAuthData.getClientId());
+					azureAuthData.getTenantId(), azureAuthData.getClientId());
 			LOGGER.info("Access Token - {}", result.getAccessToken());
 			LOGGER.info("Refresh Token - {}", result.getRefreshToken());
 			LOGGER.info("ID Token - {}", result.getIdToken());
@@ -188,7 +187,7 @@ public class TestServices {
 
 
 //			LOGGER.info("Waiting for authorization code...");
-
+			String appId = "6c3410d9-9867-4e35-abed-0eab8dd00e61";
 //			String authCodeUrl = String.format("%s/%s/oauth2/authorize?" +
 //							"client_id=%s" +
 //							"&response_type=code" +
@@ -220,17 +219,15 @@ public class TestServices {
 	}
 
 	private static AuthenticationResult getAccessTokenFromUserCredentials(
-			String username, String password, String authEndPoint, String tenantId, String resource, String clientId)
-			throws
-			Exception {
+			String username, String password, String authEndPoint, String tenantId, String clientId) throws Exception {
 		AuthenticationContext context;
 		AuthenticationResult result;
 		ExecutorService service = null;
 		try {
 			service = Executors.newFixedThreadPool(1);
-			context = new AuthenticationContext(authEndPoint + "/" + tenantId + "/", false, service);
+			context = new AuthenticationContext(authEndPoint + "/common/", false, service);
 			Future<AuthenticationResult> future = context.acquireToken(
-					resource, clientId, username, password,
+					"https://graph.windows.net", clientId, username, password,
 					null);
 			result = future.get();
 		} finally {
