@@ -177,13 +177,14 @@ public class TestServices {
 				throw e;
 			}
 			LOGGER.info("Configs from auth file are used");
+			final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN_OAUTH);
+
 			AzureADToken token = AzureADAuthenticator
-					.getTokenUsingClientCreds(azureAuthData.getActiveDirectoryEndpointUrl(),
-							azureAuthData.getClientId(), azureAuthData.getClientSecret());
+					.getTokenUsingClientCreds(ssnLoginURL, azureAuthData.getClientId(), azureAuthData.getClientSecret
+							());
 			LOGGER.info("Obtained token {} with date of expire {}", token.accessToken, token.expiry);
 			NamingHelper.setSsnToken(token.accessToken);
 			LOGGER.info("3a. Check login");
-			final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN_OAUTH);
 			LOGGER.info("   SSN login URL is {}", ssnLoginURL);
 			Response response = new HttpRequest().webApiPost(ssnLoginURL, ContentType.ANY, token.accessToken);
 			LOGGER.info("   login via SSO response body for user {} is {}", ConfigPropertyValue.getUsername(),
