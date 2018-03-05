@@ -16,6 +16,8 @@ public class AzureAuthData {
 	private String subscriptionId;
 	@JsonProperty
 	private String activeDirectoryEndpointUrl;
+	@JsonProperty
+	private String resourceManagerEndpointUrl;
 
 	public String getActiveDirectoryEndpointUrl() {
 		return activeDirectoryEndpointUrl;
@@ -35,5 +37,9 @@ public class AzureAuthData {
 
 	public String getSubscriptionId() {
 		return subscriptionId;
+	}
+
+	public String getResourceManagerEndpointUrl() {
+		return resourceManagerEndpointUrl;
 	}
 }

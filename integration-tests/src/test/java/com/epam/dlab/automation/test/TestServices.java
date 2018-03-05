@@ -178,11 +178,12 @@ public class TestServices {
 			}
 			LOGGER.info("Configs from auth file are used");
 			LOGGER.info("Active directory endpoint URL: {}", azureAuthData.getActiveDirectoryEndpointUrl());
+			LOGGER.info("Resource manager endpoint URL: {}", azureAuthData.getResourceManagerEndpointUrl());
 			LOGGER.info("Client Id: {}", azureAuthData.getClientId());
 			LOGGER.info("Client secret: {}", azureAuthData.getClientSecret());
 
 			AzureADToken token = AzureADAuthenticator
-					.getTokenUsingClientCreds("https://login.microsoftonline.com/Common/oauth2/token",
+					.getTokenUsingClientCreds(azureAuthData.getResourceManagerEndpointUrl(),
 							azureAuthData.getClientId(), azureAuthData.getClientSecret());
 			LOGGER.info("Obtained token {} with date of expire {}", token.accessToken, token.expiry);
 			NamingHelper.setSsnToken(token.accessToken);
