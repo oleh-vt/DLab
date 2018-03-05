@@ -182,7 +182,7 @@ public class TestServices {
 			LOGGER.info("Client secret: {}", azureAuthData.getClientSecret());
 
 			AzureADToken token = AzureADAuthenticator
-					.getTokenUsingClientCreds(NamingHelper.getSsnURL(),
+					.getTokenUsingClientCreds("https://login.microsoftonline.com/Common/oauth2/token",
 							azureAuthData.getClientId(), azureAuthData.getClientSecret());
 			LOGGER.info("Obtained token {} with date of expire {}", token.accessToken, token.expiry);
 			NamingHelper.setSsnToken(token.accessToken);
