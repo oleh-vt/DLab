@@ -178,11 +178,16 @@ public class TestServices {
 			}
 			LOGGER.info("Configs from auth file are used");
 			LOGGER.info("Waiting for authorization code...");
-			String authCodeUrl = String.format(
-					"%s/%s/oauth2/authorize", azureAuthData.getActiveDirectoryEndpointUrl(), azureAuthData.getTenantId
-							());
-			Response response =
-					new HttpRequest().webApiPost(authCodeUrl, ContentType.FORMDATA, azureAuthData.getClientId());
+			String appId = "6c3410d9-9867-4e35-abed-0eab8dd00e61";
+			String authCodeUrl = String.format("%s/%s/oauth2/authorize?" +
+							"client_id=%s" +
+							"&response_type=code" +
+							"&redirect_uri=%s" +
+							"&response_mode=query" +
+							"&resource=%s" +
+							"&state=12345", azureAuthData.getActiveDirectoryEndpointUrl(),
+					azureAuthData.getTenantId(), azureAuthData.getClientId(), NamingHelper.getSsnURL(), appId);
+			Response response = new HttpRequest().webApiGet(authCodeUrl);
 			LOGGER.info("Auth code response body: {}", response.getBody().asString());
 
 			String accessTokenEndpoint = String.format("%s/%s/oauth2/token",
