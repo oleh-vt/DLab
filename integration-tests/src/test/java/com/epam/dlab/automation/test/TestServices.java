@@ -35,8 +35,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.response.ResponseBody;
-import com.microsoft.aad.adal4j.AuthenticationContext;
-import com.microsoft.aad.adal4j.AuthenticationResult;
+import com.microsoft.azure.datalake.store.oauth2.AzureADAuthenticator;
+import com.microsoft.azure.datalake.store.oauth2.AzureADToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
@@ -44,14 +44,15 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import javax.naming.ServiceUnavailableException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.assertTrue;
 
@@ -177,17 +178,9 @@ public class TestServices {
 			}
 			LOGGER.info("Configs from auth file are used");
 
-			AuthenticationResult result = getAccessTokenFromUserCredentials(ConfigPropertyValue.getUsername(),
-					ConfigPropertyValue.getPassword(), azureAuthData.getActiveDirectoryEndpointUrl(),
-					azureAuthData.getTenantId(), azureAuthData.getClientId());
-			LOGGER.info("Access Token - {}", result.getAccessToken());
-			LOGGER.info("Refresh Token - {}", result.getRefreshToken());
-			LOGGER.info("ID Token - {}", result.getIdToken());
-			String token = result.getIdToken();
-
 
 //			LOGGER.info("Waiting for authorization code...");
-			String appId = "6c3410d9-9867-4e35-abed-0eab8dd00e61";
+//			String appId = "6c3410d9-9867-4e35-abed-0eab8dd00e61";
 //			String authCodeUrl = String.format("%s/%s/oauth2/authorize?" +
 //							"client_id=%s" +
 //							"&response_type=code" +
@@ -199,47 +192,24 @@ public class TestServices {
 //			Response response = new HttpRequest().webApiGet(authCodeUrl);
 //			LOGGER.info("Auth code response body: {}", response.getBody().asString());
 
-//			String accessTokenEndpoint = String.format("%s/%s/oauth2/token",
-//					azureAuthData.getActiveDirectoryEndpointUrl(), azureAuthData.getTenantId());
-//
-//			AzureADToken token = AzureADAuthenticator.getTokenUsingClientCreds(accessTokenEndpoint,
-//					azureAuthData.getClientId(), azureAuthData.getClientSecret());
-//			LOGGER.info("Obtained token {} with date of expire {}", token.accessToken, token.expiry);
-			NamingHelper.setSsnToken(token);
+			String accessTokenEndpoint = String.format("%s/%s/oauth2/token",
+					azureAuthData.getActiveDirectoryEndpointUrl(), azureAuthData.getTenantId());
+
+			AzureADToken token = AzureADAuthenticator.getTokenUsingClientCreds(accessTokenEndpoint,
+					azureAuthData.getClientId(), azureAuthData.getClientSecret());
+			LOGGER.info("Obtained token {} with date of expire {}", token.accessToken, token.expiry);
+			NamingHelper.setSsnToken(token.accessToken);
 			LOGGER.info("3a. Check login");
 			final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN_AZURE_OAUTH);
 			LOGGER.info("   SSN login URL is {}", ssnLoginURL);
-			Response response = new HttpRequest().webApiPost(ssnLoginURL, ContentType.TEXT, token);
+			LoginDto requestBody = new LoginDto(ConfigPropertyValue.getUsername(), ConfigPropertyValue.getPassword());
+			Response response = new HttpRequest().webApiPost(ssnLoginURL, ContentType.JSON, requestBody);
 			LOGGER.info("   login via SSO response body for user {} is {}", ConfigPropertyValue.getUsername(),
 					response.getBody().asString());
 			Assert.assertEquals(response.statusCode(), HttpStatusCode.OK, "User login " +
 					ConfigPropertyValue.getUsername() + " via SSO was not successful");
 			LOGGER.info("Test login via SSO finished successfully");
 		}
-	}
-
-	private static AuthenticationResult getAccessTokenFromUserCredentials(
-			String username, String password, String authEndPoint, String tenantId, String clientId) throws Exception {
-		AuthenticationContext context;
-		AuthenticationResult result;
-		ExecutorService service = null;
-		try {
-			service = Executors.newFixedThreadPool(1);
-			context = new AuthenticationContext(authEndPoint + "/common/", false, service);
-			Future<AuthenticationResult> future = context.acquireToken(
-					"https://graph.windows.net", clientId, username, password,
-					null);
-			result = future.get();
-		} finally {
-			if (Objects.nonNull(service)) {
-				service.shutdown();
-			}
-		}
-
-		if (result == null) {
-			throw new ServiceUnavailableException("authentication result was null");
-		}
-		return result;
 	}
 
 	private void testLoginSsnServiceViaLdap() throws InterruptedException, CloudException, IOException {
