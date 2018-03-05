@@ -189,7 +189,7 @@ public class TestServices {
 			LOGGER.info("3a. Check login");
 			final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN_AZURE_OAUTH);
 			LOGGER.info("   SSN login URL is {}", ssnLoginURL);
-			Response response = new HttpRequest().webApiPost(ssnLoginURL, ContentType.ANY, token.accessToken);
+			Response response = new HttpRequest().webApiPost(ssnLoginURL, ContentType.FORMDATA, token.accessToken);
 			LOGGER.info("   login via SSO response body for user {} is {}", ConfigPropertyValue.getUsername(),
 					response.getBody().asString());
 			Assert.assertEquals(response.statusCode(), HttpStatusCode.OK, "User login " +
