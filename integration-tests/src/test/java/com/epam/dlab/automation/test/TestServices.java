@@ -179,7 +179,7 @@ public class TestServices {
 			LOGGER.info("Configs from auth file are used");
 
 			AzureADToken token = AzureADAuthenticator
-					.getTokenUsingClientCreds(azureAuthData.getActiveDirectoryEndpointUrl(),
+					.getTokenUsingClientCreds(NamingHelper.getSsnURL(),
 							azureAuthData.getClientId(), azureAuthData.getClientSecret());
 			LOGGER.info("Obtained token {} with date of expire {}", token.accessToken, token.expiry);
 			NamingHelper.setSsnToken(token.accessToken);
