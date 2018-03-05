@@ -177,19 +177,25 @@ public class TestServices {
 				throw e;
 			}
 			LOGGER.info("Configs from auth file are used");
+			LOGGER.info("Waiting for authorization code...");
+			String authCodeUrl = String.format(
+					"%s/%s/oauth2/authorize", azureAuthData.getActiveDirectoryEndpointUrl(), azureAuthData.getTenantId
+							());
+			Response response =
+					new HttpRequest().webApiPost(authCodeUrl, ContentType.JSON, azureAuthData.getClientId());
+			LOGGER.info("Auth code response body: {}", response.getBody().asString());
 
-			String authEndpoint = "%s/%s/oauth2/token";
+			String accessTokenEndpoint = String.format("%s/%s/oauth2/token",
+					azureAuthData.getActiveDirectoryEndpointUrl(), azureAuthData.getTenantId());
 
-			AzureADToken token = AzureADAuthenticator.getTokenUsingClientCreds(
-					String.format(authEndpoint, azureAuthData.getActiveDirectoryEndpointUrl(), azureAuthData
-							.getTenantId()),
-							azureAuthData.getClientId(), azureAuthData.getClientSecret());
+			AzureADToken token = AzureADAuthenticator.getTokenUsingClientCreds(accessTokenEndpoint,
+					azureAuthData.getClientId(), azureAuthData.getClientSecret());
 			LOGGER.info("Obtained token {} with date of expire {}", token.accessToken, token.expiry);
 			NamingHelper.setSsnToken(token.accessToken);
 			LOGGER.info("3a. Check login");
 			final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN_AZURE_OAUTH);
 			LOGGER.info("   SSN login URL is {}", ssnLoginURL);
-			Response response = new HttpRequest().webApiPost(ssnLoginURL, ContentType.FORMDATA, token.accessToken);
+			response = new HttpRequest().webApiPost(ssnLoginURL, ContentType.TEXT, token.accessToken);
 			LOGGER.info("   login via SSO response body for user {} is {}", ConfigPropertyValue.getUsername(),
 					response.getBody().asString());
 			Assert.assertEquals(response.statusCode(), HttpStatusCode.OK, "User login " +
