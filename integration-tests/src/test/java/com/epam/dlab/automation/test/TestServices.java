@@ -101,7 +101,7 @@ public class TestServices {
 		} else {
 			testLoginSsnServiceViaLdap();
 		}
-		testLogoutSsnService();
+		//testLogoutSsnService();
 		RestAssured.baseURI = NamingHelper.getSsnURL();
 		NamingHelper.setSsnToken(ssnLoginAndKeyUpload(oauth2AuthenticationRequired));
 		//runTestsInNotebooks();
