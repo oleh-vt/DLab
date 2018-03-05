@@ -177,18 +177,18 @@ public class TestServices {
 				throw e;
 			}
 			LOGGER.info("Configs from auth file are used");
-			LOGGER.info("Waiting for authorization code...");
-			String appId = "6c3410d9-9867-4e35-abed-0eab8dd00e61";
-			String authCodeUrl = String.format("%s/%s/oauth2/authorize?" +
-							"client_id=%s" +
-							"&response_type=code" +
-							"&redirect_uri=%s" +
-							"&response_mode=query" +
-							"&resource=%s" +
-							"&state=12345", azureAuthData.getActiveDirectoryEndpointUrl(),
-					azureAuthData.getTenantId(), azureAuthData.getClientId(), NamingHelper.getSsnURL(), appId);
-			Response response = new HttpRequest().webApiGet(authCodeUrl);
-			LOGGER.info("Auth code response body: {}", response.getBody().asString());
+//			LOGGER.info("Waiting for authorization code...");
+//			String appId = "6c3410d9-9867-4e35-abed-0eab8dd00e61";
+//			String authCodeUrl = String.format("%s/%s/oauth2/authorize?" +
+//							"client_id=%s" +
+//							"&response_type=code" +
+//							"&redirect_uri=%s" +
+//							"&response_mode=query" +
+//							"&resource=%s" +
+//							"&state=12345", azureAuthData.getActiveDirectoryEndpointUrl(),
+//					azureAuthData.getTenantId(), azureAuthData.getClientId(), NamingHelper.getSsnURL(), appId);
+//			Response response = new HttpRequest().webApiGet(authCodeUrl);
+//			LOGGER.info("Auth code response body: {}", response.getBody().asString());
 
 			String accessTokenEndpoint = String.format("%s/%s/oauth2/token",
 					azureAuthData.getActiveDirectoryEndpointUrl(), azureAuthData.getTenantId());
@@ -197,15 +197,15 @@ public class TestServices {
 					azureAuthData.getClientId(), azureAuthData.getClientSecret());
 			LOGGER.info("Obtained token {} with date of expire {}", token.accessToken, token.expiry);
 			NamingHelper.setSsnToken(token.accessToken);
-			LOGGER.info("3a. Check login");
-			final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN_AZURE_OAUTH);
-			LOGGER.info("   SSN login URL is {}", ssnLoginURL);
-			response = new HttpRequest().webApiPost(ssnLoginURL, ContentType.TEXT, token.accessToken);
-			LOGGER.info("   login via SSO response body for user {} is {}", ConfigPropertyValue.getUsername(),
-					response.getBody().asString());
-			Assert.assertEquals(response.statusCode(), HttpStatusCode.OK, "User login " +
-					ConfigPropertyValue.getUsername() + " via SSO was not successful");
-			LOGGER.info("Test login via SSO finished successfully");
+//			LOGGER.info("3a. Check login");
+//			final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN_AZURE_OAUTH);
+//			LOGGER.info("   SSN login URL is {}", ssnLoginURL);
+//			response = new HttpRequest().webApiPost(ssnLoginURL, ContentType.TEXT, token.accessToken);
+//			LOGGER.info("   login via SSO response body for user {} is {}", ConfigPropertyValue.getUsername(),
+//					response.getBody().asString());
+//			Assert.assertEquals(response.statusCode(), HttpStatusCode.OK, "User login " +
+//					ConfigPropertyValue.getUsername() + " via SSO was not successful");
+//			LOGGER.info("Test login via SSO finished successfully");
 		}
 	}
 
