@@ -97,7 +97,7 @@ public class TestServices {
 				ConfigPropertyValue.getCloudProvider().equals(CloudProvider.AZURE_PROVIDER) &&
 						Boolean.valueOf(ConfigPropertyValue.getAzureDatalakeEnabled());
 		if (oauth2AuthenticationRequired) {
-			testLoginSsnServiceViaSso();
+			testOAuth2ServiceAzure();
 		} else {
 			testLoginSsnServiceViaLdap();
 		}
@@ -163,7 +163,7 @@ public class TestServices {
 		LOGGER.info("   SSN service is available");
 	}
 
-	private void testLoginSsnServiceViaSso() throws InterruptedException, CloudException, IOException {
+	private void testOAuth2ServiceAzure() throws InterruptedException, CloudException, IOException {
 		checkSsnAvailability();
 		LOGGER.info("3. Waiting for authentication token...");
 		Path path = Paths.get(ConfigPropertyValue.getAzureAuthFileName());
@@ -177,25 +177,17 @@ public class TestServices {
 				throw e;
 			}
 			LOGGER.info("Configs from auth file are used");
-			LOGGER.info("Active directory endpoint URL: {}", azureAuthData.getActiveDirectoryEndpointUrl());
-			LOGGER.info("Resource manager endpoint URL: {}", azureAuthData.getResourceManagerEndpointUrl());
-			LOGGER.info("Client Id: {}", azureAuthData.getClientId());
-			LOGGER.info("Client secret: {}", azureAuthData.getClientSecret());
 
-			String authEndpoint = "https://login.microsoftonline.com/%s/oauth2/token";
+			String authEndpoint = "%s/%s/oauth2/token";
 
-//			String appId = "6c3410d9-9867-4e35-abed-0eab8dd00e61";
-			AzureADToken token = AzureADAuthenticator
-					.getTokenUsingClientCreds(String.format(authEndpoint, azureAuthData.getTenantId()),
+			AzureADToken token = AzureADAuthenticator.getTokenUsingClientCreds(
+					String.format(authEndpoint, azureAuthData.getActiveDirectoryEndpointUrl(), azureAuthData
+							.getTenantId()),
 							azureAuthData.getClientId(), azureAuthData.getClientSecret());
-//			String username = ConfigPropertyValue.getUsername();
-//			String pass = ConfigPropertyValue.getPassword();
-//			AzureADToken token = AzureADAuthenticator.getTokenUsingUserCreds(appId, username,
-//					pass);
 			LOGGER.info("Obtained token {} with date of expire {}", token.accessToken, token.expiry);
 			NamingHelper.setSsnToken(token.accessToken);
 			LOGGER.info("3a. Check login");
-			final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN_OAUTH);
+			final String ssnLoginURL = NamingHelper.getSelfServiceURL(ApiPath.LOGIN_AZURE_OAUTH);
 			LOGGER.info("   SSN login URL is {}", ssnLoginURL);
 			Response response = new HttpRequest().webApiPost(ssnLoginURL, ContentType.ANY, token.accessToken);
 			LOGGER.info("   login via SSO response body for user {} is {}", ConfigPropertyValue.getUsername(),
