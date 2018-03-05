@@ -146,10 +146,9 @@ limitations under the License.
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure</groupId>
-            <artifactId>azure-data-lake-store-sdk</artifactId>
-            <version>2.2.5</version>
+            <artifactId>adal4j</artifactId>
+            <version>1.4.0</version>
         </dependency>
-
 
         <dependency>
             <groupId>com.google.cloud</groupId>
