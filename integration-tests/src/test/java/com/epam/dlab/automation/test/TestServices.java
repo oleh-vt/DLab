@@ -177,6 +177,9 @@ public class TestServices {
 				throw e;
 			}
 			LOGGER.info("Configs from auth file are used");
+			LOGGER.info("Active directory endpoint URL: {}", azureAuthData.getActiveDirectoryEndpointUrl());
+			LOGGER.info("Client Id: {}", azureAuthData.getClientId());
+			LOGGER.info("Client secret: {}", azureAuthData.getClientSecret());
 
 			AzureADToken token = AzureADAuthenticator
 					.getTokenUsingClientCreds(NamingHelper.getSsnURL(),
