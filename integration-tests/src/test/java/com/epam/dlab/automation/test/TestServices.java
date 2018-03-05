@@ -182,9 +182,13 @@ public class TestServices {
 			LOGGER.info("Client Id: {}", azureAuthData.getClientId());
 			LOGGER.info("Client secret: {}", azureAuthData.getClientSecret());
 
-			AzureADToken token = AzureADAuthenticator
-					.getTokenUsingClientCreds(azureAuthData.getResourceManagerEndpointUrl(),
-							azureAuthData.getClientId(), azureAuthData.getClientSecret());
+//			AzureADToken token = AzureADAuthenticator
+//					.getTokenUsingClientCreds(azureAuthData.getActiveDirectoryEndpointUrl(),
+//							azureAuthData.getClientId(), azureAuthData.getClientSecret());
+			String username = ConfigPropertyValue.getUsername();
+			String pass = ConfigPropertyValue.getPassword();
+			AzureADToken token = AzureADAuthenticator.getTokenUsingUserCreds(azureAuthData.getClientId(), username,
+					pass);
 			LOGGER.info("Obtained token {} with date of expire {}", token.accessToken, token.expiry);
 			NamingHelper.setSsnToken(token.accessToken);
 			LOGGER.info("3a. Check login");
