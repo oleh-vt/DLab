@@ -254,8 +254,7 @@ public class TestServices {
 			executor.execute(runNotebookImageCreationTask);
 		}
 		for (NotebookConfig notebookConfig : notebookConfigs) {
-			if (!ConfigPropertyValue.isRunModeLocal() &&
-					CloudProvider.AZURE_PROVIDER.equals(ConfigPropertyValue.getCloudProvider())) {
+			if (!ConfigPropertyValue.isRunModeLocal()) {
 				LOGGER.debug("Waiting " + NOTEBOOK_CREATION_DELAY / 1000 + " sec to start notebook creation...");
 				TimeUnit.SECONDS.sleep(NOTEBOOK_CREATION_DELAY / 1000);
 			}
