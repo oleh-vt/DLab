@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -189,6 +190,10 @@ public class TestDataEngineService {
 				LOGGER.info("{}: Port forwarding from ssn {} to notebook {}...", notebookName, ssnIP, noteBookIp);
 				int assignedPort = ssnSession.setPortForwardingL(0, noteBookIp, 22);
 				LOGGER.info("{}: Port forwarded localhost:{} -> {}:22", notebookName, assignedPort, noteBookIp);
+				if (!ConfigPropertyValue.isRunModeLocal()) {
+					LOGGER.info("Waiting 1 min for Python script execution...");
+					TimeUnit.SECONDS.sleep(60);
+				}
 				executePythonScript(noteBookIp, clusterName, notebookScenarioTestFile, assignedPort, notebookName);
 			}
         }
