@@ -245,14 +245,14 @@ public class TestServices {
 		ExecutorService executor = Executors.newFixedThreadPool(
 				ConfigPropertyValue.getExecutionThreads() > 0 ? ConfigPropertyValue.getExecutionThreads() : N_THREADS);
 		List<FutureTask<Boolean>> futureTasks = new ArrayList<>();
-		if (!notebookConfigs.isEmpty() && !CloudProvider.GCP_PROVIDER.equals(ConfigPropertyValue.getCloudProvider())) {
-			LOGGER.info("The following tests will be executed: creation notebook from template, creation machine " +
-					"image from previously created notebook, creation notebook from machine image");
-			FutureTask<Boolean> runNotebookImageCreationTask =
-					new FutureTask<>(new TestCallable(notebookConfigs.get(0), true));
-			futureTasks.add(runNotebookImageCreationTask);
-			executor.execute(runNotebookImageCreationTask);
-		}
+//		if (!notebookConfigs.isEmpty() && !CloudProvider.GCP_PROVIDER.equals(ConfigPropertyValue.getCloudProvider())) {
+//			LOGGER.info("The following tests will be executed: creation notebook from template, creation machine " +
+//					"image from previously created notebook, creation notebook from machine image");
+//			FutureTask<Boolean> runNotebookImageCreationTask =
+//					new FutureTask<>(new TestCallable(notebookConfigs.get(0), true));
+//			futureTasks.add(runNotebookImageCreationTask);
+//			executor.execute(runNotebookImageCreationTask);
+//		}
 		for (NotebookConfig notebookConfig : notebookConfigs) {
 			if (!ConfigPropertyValue.isRunModeLocal()) {
 				LOGGER.debug("Waiting " + NOTEBOOK_CREATION_DELAY / 1000 + " sec to start notebook creation...");
