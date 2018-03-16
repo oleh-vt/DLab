@@ -49,7 +49,8 @@ public class AzureHelper{
 
     static {
         try {
-            azure = Azure.configure().authenticate(new File(ConfigPropertyValue.getAzureAuthFileName())).withDefaultSubscription();
+            azure = ConfigPropertyValue.isRunModeLocal() ? null : Azure.configure().authenticate(
+                    new File(ConfigPropertyValue.getAzureAuthFileName())).withDefaultSubscription();
         } catch (IOException e) {
             LOGGER.warn("Exception is occured ", e);
         }
