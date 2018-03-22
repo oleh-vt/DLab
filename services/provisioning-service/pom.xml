@@ -26,6 +26,11 @@
             <artifactId>mockito-core</artifactId>
             <version>${org.mockito.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.smoketurner</groupId>
+            <artifactId>dropwizard-swagger</artifactId>
+            <version>${com.smoketurner.dropwizard-swagger.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

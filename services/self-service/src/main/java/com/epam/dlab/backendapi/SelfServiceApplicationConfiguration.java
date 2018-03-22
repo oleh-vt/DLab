@@ -26,6 +26,7 @@ import com.epam.dlab.validation.AzureValidation;
 import com.epam.dlab.validation.GcpValidation;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.util.Duration;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.group.GroupSequenceProvider;
 
@@ -94,6 +95,9 @@ public class SelfServiceApplicationConfiguration extends ServiceConfiguration {
 	private int maxUserNameLength;
 	@JsonProperty
 	private boolean gcpOuauth2AuthenticationEnabled;
+
+	@JsonProperty("swagger")
+	public SwaggerBundleConfiguration swaggerBundleConfiguration;
 
 	public boolean isGcpOuauth2AuthenticationEnabled() {
 		return gcpOuauth2AuthenticationEnabled;

@@ -118,6 +118,9 @@ server:
       trustStorePath: ${TRUST_STORE_PATH}
       trustStorePassword: ${TRUST_STORE_PASSWORD}
 
+swagger:
+  resourcePackage: com/epam/dlab/backendapi/resources
+
 logging:
   level: INFO
   loggers:

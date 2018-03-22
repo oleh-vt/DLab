@@ -135,6 +135,11 @@
             <version>${com.jcraft.jsch.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.smoketurner</groupId>
+            <artifactId>dropwizard-swagger</artifactId>
+            <version>${com.smoketurner.dropwizard-swagger.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.hamcrest</groupId>

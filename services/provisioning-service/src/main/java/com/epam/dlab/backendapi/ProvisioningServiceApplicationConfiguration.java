@@ -22,6 +22,7 @@ import com.epam.dlab.backendapi.validation.ProvisioningServiceCloudConfiguration
 import com.epam.dlab.validation.AwsValidation;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.util.Duration;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.group.GroupSequenceProvider;
 
@@ -83,6 +84,9 @@ public class ProvisioningServiceApplicationConfiguration extends ServiceConfigur
     private String backupScriptPath;
     @JsonProperty
     private String backupDirectory;
+
+    @JsonProperty("swagger")
+    public SwaggerBundleConfiguration swaggerBundleConfiguration;
 
     public String getKeyDirectory() {
         return keyDirectory;

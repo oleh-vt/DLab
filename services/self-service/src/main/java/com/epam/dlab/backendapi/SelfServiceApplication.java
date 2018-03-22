@@ -38,6 +38,8 @@ import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.federecio.dropwizard.swagger.SwaggerBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 /**
@@ -68,6 +70,13 @@ public class SelfServiceApplication extends Application<SelfServiceApplicationCo
 		bootstrap.addBundle(new TemplateConfigBundle(
 				new TemplateConfigBundleConfiguration().fileIncludePath(ServiceUtils.getConfPath())
 		));
+		bootstrap.addBundle(new SwaggerBundle<SelfServiceApplicationConfiguration>() {
+			@Override
+			protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(
+					SelfServiceApplicationConfiguration configuration) {
+				return configuration.swaggerBundleConfiguration;
+			}
+		});
 	}
 
 	@Override
@@ -83,9 +92,8 @@ public class SelfServiceApplication extends Application<SelfServiceApplicationCo
 		environment.lifecycle().manage(injector.getInstance(ExploratoryLibCache.class));
 		environment.lifecycle().manage(injector.getInstance(ManagedScheduler.class));
 		environment.healthChecks().register(ServiceConsts.MONGO_NAME, injector.getInstance(MongoHealthCheck.class));
-		environment.healthChecks().register(ServiceConsts.PROVISIONING_SERVICE_NAME, injector.getInstance
-				(ProvisioningServiceHealthCheck
-						.class));
+		environment.healthChecks().register(ServiceConsts.PROVISIONING_SERVICE_NAME,
+				injector.getInstance(ProvisioningServiceHealthCheck.class));
 
 		JerseyEnvironment jersey = environment.jersey();
 		jersey.register(new RuntimeExceptionMapper());
