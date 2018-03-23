@@ -36,8 +36,6 @@ import io.dropwizard.Application;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import io.federecio.dropwizard.swagger.SwaggerBundle;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 public class ProvisioningServiceApplication extends Application<ProvisioningServiceApplicationConfiguration> {
 
@@ -53,13 +51,6 @@ public class ProvisioningServiceApplication extends Application<ProvisioningServ
         bootstrap.addBundle(new TemplateConfigBundle(
                 new TemplateConfigBundleConfiguration().fileIncludePath(ServiceUtils.getConfPath())
         ));
-		bootstrap.addBundle(new SwaggerBundle<ProvisioningServiceApplicationConfiguration>() {
-			@Override
-			protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(
-					ProvisioningServiceApplicationConfiguration configuration) {
-				return configuration.swaggerBundleConfiguration;
-			}
-		});
     }
 
     @Override
