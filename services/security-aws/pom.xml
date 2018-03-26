@@ -30,7 +30,7 @@
 
 
     <properties>
-        <aws-java-sdk-iam.version>1.11.48</aws-java-sdk-iam.version>
+        <aws-java-sdk-iam.version>1.11.301</aws-java-sdk-iam.version>
     </properties>
 
     <dependencies>

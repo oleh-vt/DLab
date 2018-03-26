@@ -60,8 +60,8 @@
     <artifactId>self-service</artifactId>
 
     <properties>
-        <org.glassfish.jersey.media.version>2.23.1</org.glassfish.jersey.media.version>
-        <com.fiestacabin.dropwizard.quartz.version>0.7.1</com.fiestacabin.dropwizard.quartz.version>
+        <org.glassfish.jersey.media.version>2.25.1</org.glassfish.jersey.media.version>
+        <com.fiestacabin.dropwizard.quartz.version>0.7.2</com.fiestacabin.dropwizard.quartz.version>
         <com.jcraft.jsch.version>0.1.54</com.jcraft.jsch.version>
     </properties>
 

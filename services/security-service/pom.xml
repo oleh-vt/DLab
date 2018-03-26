@@ -44,8 +44,8 @@
     <artifactId>security-service</artifactId>
 
     <properties>
-        <org.apache.directory.api.version>1.0.0-RC1</org.apache.directory.api.version>
-        <jython-standalone.version>2.7.0</jython-standalone.version>
+        <org.apache.directory.api.version>1.0.0</org.apache.directory.api.version>
+        <jython-standalone.version>2.7.1</jython-standalone.version>
     </properties>
 
     <dependencies>

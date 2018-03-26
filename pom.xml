@@ -59,23 +59,24 @@ limitations under the License.
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <org.apache.commons.version>3.5</org.apache.commons.version>
-        <io.dropwizard.version>1.0.2</io.dropwizard.version>
-        <com.google.inject.version>4.1.0</com.google.inject.version>
-        <dropwizard-template-config.version>1.4.0</dropwizard-template-config.version>
-        <com.aegisql.conveyor.version>1.1.7</com.aegisql.conveyor.version>
-        <org.mongodb.version>3.3.0</org.mongodb.version>
+        <org.apache.commons.version>3.7</org.apache.commons.version>
+        <io.dropwizard.version>1.2.4</io.dropwizard.version>
+        <com.google.inject.version>4.2.0</com.google.inject.version>
+        <com.google.guava.version>24.1-jre</com.google.guava.version>
+        <dropwizard-template-config.version>1.5.0</dropwizard-template-config.version>
+        <com.aegisql.conveyor.version>1.1.9</com.aegisql.conveyor.version>
+        <org.mongodb.version>3.5.0</org.mongodb.version>
         <junit.version>4.12</junit.version>
-        <org.mockito.version>1.10.19</org.mockito.version>
-        <com.fasterxml.jackson.core.version>2.8.8</com.fasterxml.jackson.core.version>
-        <com.fasterxml.jackson.annotations.version>2.8.0</com.fasterxml.jackson.annotations.version>
-        <com.smoketurner.dropwizard-swagger.version>1.0.6-1</com.smoketurner.dropwizard-swagger.version>
+        <org.mockito.version>2.16.0</org.mockito.version>
+        <com.fasterxml.jackson.core.version>2.9.4</com.fasterxml.jackson.core.version>
+        <com.fasterxml.jackson.annotations.version>2.9.4</com.fasterxml.jackson.annotations.version>
+        <com.smoketurner.dropwizard-swagger.version>1.2.2-2</com.smoketurner.dropwizard-swagger.version>
 
         <java.version>1.8</java.version>
         <properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
-        <maven-compiler-plugin.version>3.5.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
         <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
-        <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
+        <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
     </properties>
     <dependencyManagement>
