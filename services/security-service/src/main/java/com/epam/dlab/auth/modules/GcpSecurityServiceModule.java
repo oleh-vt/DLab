@@ -7,7 +7,7 @@ import com.epam.dlab.auth.gcp.service.GcpAuthenticationService;
 import com.epam.dlab.auth.oauth2.Oauth2AuthenticationService;
 import com.epam.dlab.auth.resources.SynchronousLdapAuthenticationService;
 import com.epam.dlab.cloud.CloudModule;
-import com.epam.dlab.config.gcp.GcpLoginConfiguration;
+import com.epam.dlab.auth.gcp.conf.GcpLoginConfiguration;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.http.HttpTransport;

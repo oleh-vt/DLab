@@ -87,6 +87,11 @@
             <artifactId>mongo-java-driver</artifactId>
             <version>${org.mongodb.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.aegisql</groupId>
+            <artifactId>conveyor</artifactId>
+            <version>${com.aegisql.conveyor.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

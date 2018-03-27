@@ -22,6 +22,9 @@ import com.aegisql.conveyor.AssemblingConveyor;
 import com.aegisql.conveyor.BuildingSite;
 import com.aegisql.conveyor.cart.Cart;
 import com.aegisql.conveyor.cart.FutureCart;
+import com.epam.dlab.process.model.ProcessId;
+import com.epam.dlab.process.model.ProcessInfo;
+import com.epam.dlab.process.model.ProcessStep;
 
 public class ProcessConveyor extends AssemblingConveyor<ProcessId,ProcessStep,ProcessInfo>{
 

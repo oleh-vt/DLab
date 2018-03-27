@@ -20,7 +20,6 @@ package com.epam.dlab.backendapi;
 
 import com.epam.dlab.ServiceConfiguration;
 import com.epam.dlab.backendapi.validation.SelfServiceCloudConfigurationSequenceProvider;
-import com.epam.dlab.config.azure.AzureLoginConfiguration;
 import com.epam.dlab.validation.AwsValidation;
 import com.epam.dlab.validation.AzureValidation;
 import com.epam.dlab.validation.GcpValidation;
@@ -64,7 +63,7 @@ public class SelfServiceApplicationConfiguration extends ServiceConfiguration {
 	private int maxSparkInstanceCount;
 
 	@JsonProperty
-	private AzureLoginConfiguration azureLoginConfiguration;
+	private boolean azureOuauth2AuthenticationEnabled;
 
 	@JsonProperty
 	private boolean rolePolicyEnabled = false;
@@ -94,9 +93,19 @@ public class SelfServiceApplicationConfiguration extends ServiceConfiguration {
 	private int maxUserNameLength;
 	@JsonProperty
 	private boolean gcpOuauth2AuthenticationEnabled;
+	@JsonProperty
+	private long maxSessionDurabilityMilliseconds;
+
+	public long getMaxSessionDurabilityMilliseconds() {
+		return maxSessionDurabilityMilliseconds;
+	}
 
 	public boolean isGcpOuauth2AuthenticationEnabled() {
 		return gcpOuauth2AuthenticationEnabled;
+	}
+
+	public boolean isAzureOuauth2AuthenticationEnabled() {
+		return azureOuauth2AuthenticationEnabled;
 	}
 
 	/**
@@ -163,13 +172,6 @@ public class SelfServiceApplicationConfiguration extends ServiceConfiguration {
 	 */
 	public String getBillingConfFile() {
 		return billingConfFile;
-	}
-
-	/**
-	 * Return the Azure login configuration
-	 */
-	public AzureLoginConfiguration getAzureLoginConfiguration() {
-		return azureLoginConfiguration;
 	}
 
 

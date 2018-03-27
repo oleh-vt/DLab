@@ -1,7 +1,7 @@
 package com.epam.dlab.auth.gcp.resources;
 
 
-import com.epam.dlab.auth.gcp.dto.GcpOauth2AuthorizationCodeResponse;
+import com.epam.dlab.dto.gcp.auth.GcpOauth2AuthorizationCodeResponse;
 import com.epam.dlab.auth.oauth2.Oauth2AuthenticationService;
 import com.epam.dlab.exceptions.DlabAuthenticationException;
 import com.epam.dlab.rest.contracts.SecurityAPI;
@@ -35,5 +35,4 @@ public class GcpOauth2SecurityResource {
 		}
 		return Response.ok(authenticationService.authorize(codeResponse.getCode(), codeResponse.getState())).build();
 	}
-
 }

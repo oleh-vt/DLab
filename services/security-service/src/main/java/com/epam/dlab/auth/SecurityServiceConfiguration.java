@@ -20,7 +20,7 @@ package com.epam.dlab.auth;
 import com.epam.dlab.ServiceConfiguration;
 import com.epam.dlab.auth.dao.Request;
 import com.epam.dlab.config.azure.AzureLoginConfiguration;
-import com.epam.dlab.config.gcp.GcpLoginConfiguration;
+import com.epam.dlab.auth.gcp.conf.GcpLoginConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.directory.ldap.client.api.LdapConnectionConfig;
 

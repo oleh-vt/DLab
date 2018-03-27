@@ -47,7 +47,8 @@ public class ModuleFactory {
             case AWS:
                 return new AwsSelfServiceModule();
             case AZURE:
-                return new AzureSelfServiceModule(configuration.getAzureLoginConfiguration());
+                return new AzureSelfServiceModule(configuration.isAzureOuauth2AuthenticationEnabled(),
+                        configuration.getMaxSessionDurabilityMilliseconds());
             case GCP:
                 return new GcpSelfServiceModule();
             default:

@@ -4,6 +4,7 @@ import com.epam.dlab.auth.SecurityServiceConfiguration;
 import com.epam.dlab.auth.UserInfoDAO;
 import com.epam.dlab.auth.UserVerificationService;
 import com.epam.dlab.auth.azure.AzureAuthenticationService;
+import com.epam.dlab.auth.azure.AzureLoginUrlBuilder;
 import com.epam.dlab.auth.azure.DlabExceptionMapper;
 import com.epam.dlab.auth.resources.SynchronousLdapAuthenticationService;
 import com.epam.dlab.cloud.CloudModule;
@@ -24,6 +25,9 @@ public class AzureSecurityServiceModule extends CloudModule {
 	@Override
 	protected void configure() {
 		bind(UserVerificationService.class).toInstance(SecurityServiceModule.defaultUserVerificationService());
+		if (!conf.getAzureLoginConfiguration().isUseLdap()) {
+			bind(AzureLoginUrlBuilder.class).toInstance(new AzureLoginUrlBuilder(conf.getAzureLoginConfiguration()));
+		}
 	}
 
 	@Override

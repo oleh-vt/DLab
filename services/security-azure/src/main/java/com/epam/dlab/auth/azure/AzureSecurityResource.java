@@ -17,6 +17,7 @@
 package com.epam.dlab.auth.azure;
 
 import com.epam.dlab.constants.ServiceConsts;
+import com.epam.dlab.dto.azure.auth.AuthorizationCodeFlowResponse;
 import com.epam.dlab.rest.client.RESTService;
 import com.epam.dlab.rest.contracts.SecurityAPI;
 import com.google.common.cache.Cache;

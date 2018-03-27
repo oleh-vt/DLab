@@ -1,7 +1,7 @@
 package com.epam.dlab.backendapi.resources.gcp;
 
-import com.epam.dlab.auth.gcp.dto.GcpOauth2AuthorizationCodeResponse;
 import com.epam.dlab.constants.ServiceConsts;
+import com.epam.dlab.dto.gcp.auth.GcpOauth2AuthorizationCodeResponse;
 import com.epam.dlab.rest.client.RESTService;
 import com.epam.dlab.rest.contracts.SecurityAPI;
 import com.google.inject.Inject;

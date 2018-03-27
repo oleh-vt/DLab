@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package com.epam.dlab.process;
+package com.epam.dlab.process.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,7 +33,8 @@ public class ProcessInfo {
 
     private final Collection<ProcessInfo> rejectedCommands;
 
-    ProcessInfo(ProcessId id, ProcessStatus status, String[] command, String stdOut, String stdErr, int exitCode, long startTimeStamp, long infoTimeStamp, Collection<ProcessInfo> rejected, int pid) {
+    public ProcessInfo(ProcessId id, ProcessStatus status, String[] command, String stdOut, String stdErr, int exitCode,
+                 long startTimeStamp, long infoTimeStamp, Collection<ProcessInfo> rejected, int pid) {
         this.id             = id;
         this.status         = status;
         this.command        = command;
