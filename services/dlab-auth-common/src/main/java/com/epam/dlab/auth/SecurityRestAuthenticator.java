@@ -45,6 +45,6 @@ public class SecurityRestAuthenticator implements Authenticator<String, UserInfo
 		LOGGER.debug("authenticate token {}", credentials);
 
 		return Optional.ofNullable(systemUserInfoService.getUser(credentials).orElseGet(
-				() -> securityService.post(GET_USER_INFO, credentials, UserInfo.class)));
+				() -> securityService.post(SecurityAPI.GET_USER_INFO, credentials, UserInfo.class)));
 	}
 }

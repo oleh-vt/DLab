@@ -26,31 +26,19 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>security-gcp</artifactId>
+    <artifactId>dlab-auth-common</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.epam.dlab</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.api-client</groupId>
-            <artifactId>google-api-client-java6</artifactId>
-            <version>1.23.0</version>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>${org.mongodb.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.apis</groupId>
-            <artifactId>google-api-services-plus</artifactId>
-            <version>v1-rev540-1.23.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.epam.dlab</groupId>
-            <artifactId>dlab-auth-common</artifactId>
-            <version>${project.parent.version}</version>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-auth</artifactId>
+            <version>${io.dropwizard.version}</version>
         </dependency>
     </dependencies>
-
-
 </project>

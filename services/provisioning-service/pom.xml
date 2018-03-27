@@ -31,6 +31,16 @@
             <artifactId>mockito-core</artifactId>
             <version>${org.mockito.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.epam.dlab</groupId>
+            <artifactId>dlab-auth-common</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.epam.dlab</groupId>
+            <artifactId>dlab-rest-client</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -101,6 +101,16 @@
             <artifactId>jsch</artifactId>
             <version>${com.jcraft.jsch.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.epam.dlab</groupId>
+            <artifactId>dlab-auth-common</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.epam.dlab</groupId>
+            <artifactId>dlab-rest-client</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
 
         <dependency>
